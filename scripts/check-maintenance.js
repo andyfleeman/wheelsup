@@ -4,14 +4,16 @@ import { Resend } from 'resend'
 const db = initFirebase()
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-const NOTIFY_DAYS_AHEAD = 7   // warn this many days before estimated due date
+const NOTIFY_DAYS_AHEAD = 7    // warn this many days before estimated due date
 const NOTIFY_COOLDOWN_DAYS = 5 // don't re-notify within this window
 
+// All items — both mileage and time intervals included
 const MAINTENANCE_ITEMS = [
-  { id: 'oil_change',         label: 'Oil Change',          icon: '🛢️',  defaultIntervalMiles: 5000  },
-  { id: 'tire_rotation',      label: 'Tire Rotation',       icon: '🔄',  defaultIntervalMiles: 7500  },
-  { id: 'air_filter',         label: 'Air Filter',          icon: '💨',  defaultIntervalMiles: 20000 },
-  { id: 'transmission_fluid', label: 'Transmission Fluid',  icon: '⚙️',  defaultIntervalMiles: 45000 },
+  { id: 'oil_change',         label: 'Oil Change',         icon: '🛢️', defaultIntervalMiles: 5000,  defaultIntervalMonths: 6  },
+  { id: 'tire_rotation',      label: 'Tire Rotation',      icon: '🔄', defaultIntervalMiles: 7500,  defaultIntervalMonths: 6  },
+  { id: 'air_filter',         label: 'Air Filter',         icon: '💨', defaultIntervalMiles: 20000, defaultIntervalMonths: 24 },
+  { id: 'battery',            label: 'Battery',            icon: '🔋', defaultIntervalMiles: null,  defaultIntervalMonths: 48 },
+  { id: 'transmission_fluid', label: 'Transmission Fluid', icon: '⚙️', defaultIntervalMiles: 45000, defaultIntervalMonths: 36 },
 ]
 
 function initFirebase() {
@@ -35,7 +37,7 @@ async function getLastRecords(uid, vehicleId) {
   return last
 }
 
-async function getIntervals(uid, vehicleId) {
+async function getCustomIntervals(uid, vehicleId) {
   const snap = await db
     .collection('users').doc(uid)
     .collection('vehicles').doc(vehicleId)
@@ -47,12 +49,12 @@ async function getIntervals(uid, vehicleId) {
 }
 
 async function getLastNotified(uid, vehicleId, itemId) {
-  const doc = await db
+  const ref = await db
     .collection('users').doc(uid)
     .collection('vehicles').doc(vehicleId)
     .collection('notifications').doc(itemId)
     .get()
-  return doc.exists ? doc.data().sentAt?.toDate() : null
+  return ref.exists ? ref.data().sentAt?.toDate() : null
 }
 
 async function markNotified(uid, vehicleId, itemId) {
@@ -63,23 +65,86 @@ async function markNotified(uid, vehicleId, itemId) {
     .set({ sentAt: admin.firestore.FieldValue.serverTimestamp() })
 }
 
+// Returns { daysOut, overdue, reason, nextMileage, timeDueDate } or null if no threshold applies
+function calcDueInfo(item, last, vehicle, customIntervals, today) {
+  let mileageDaysOut = Infinity
+  let mileageOverdue = false
+  let nextMileage = null
+
+  // Mileage threshold
+  if (item.defaultIntervalMiles && vehicle.currentMileage) {
+    const intervalMiles = customIntervals[item.id]?.miles ?? item.defaultIntervalMiles
+    const baseMileage = last?.mileage ?? vehicle.currentMileage
+    nextMileage = baseMileage + intervalMiles
+    const milesRemaining = nextMileage - vehicle.currentMileage
+
+    if (milesRemaining <= 0) {
+      mileageDaysOut = 0
+      mileageOverdue = true
+    } else if (vehicle.dailyMiles) {
+      mileageDaysOut = Math.round(milesRemaining / vehicle.dailyMiles)
+    }
+    // If no dailyMiles, mileageDaysOut stays Infinity — can't estimate
+  }
+
+  // Time threshold — requires a logged service date to anchor from
+  let timeDaysOut = Infinity
+  let timeOverdue = false
+  let timeDueDate = null
+
+  if (item.defaultIntervalMonths && last?.date) {
+    timeDueDate = new Date(last.date)
+    timeDueDate.setMonth(timeDueDate.getMonth() + item.defaultIntervalMonths)
+    const msRemaining = timeDueDate - today
+    timeDaysOut = Math.round(msRemaining / (1000 * 60 * 60 * 24))
+    if (timeDaysOut <= 0) timeOverdue = true
+  }
+
+  // Both thresholds unknown — nothing to report
+  if (mileageDaysOut === Infinity && timeDaysOut === Infinity) return null
+
+  // Use whichever fires first
+  const useMileage = mileageDaysOut <= timeDaysOut
+  const daysOut = useMileage ? mileageDaysOut : timeDaysOut
+  const overdue = useMileage ? mileageOverdue : timeOverdue
+
+  return {
+    daysOut: Math.max(0, daysOut),
+    overdue,
+    reason: useMileage ? 'mileage' : 'time',
+    nextMileage: useMileage ? nextMileage : null,
+    timeDueDate: !useMileage ? timeDueDate : null,
+  }
+}
+
 function buildEmailHtml(userName, dueItems) {
-  const rows = dueItems.map(d => `
-    <tr>
-      <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;font-size:1.2em">${d.icon}</td>
-      <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0">
-        <strong>${d.vehicle}</strong><br/>
-        <span style="color:#555">${d.label}</span>
-      </td>
-      <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;text-align:right;white-space:nowrap">
-        ${d.overdue
-          ? `<span style="color:#d32f2f;font-weight:600">Overdue</span>`
-          : `<span style="color:#f57c00;font-weight:600">~${d.daysOut} day${d.daysOut === 1 ? '' : 's'}</span><br/>
-             <span style="color:#888;font-size:0.85em">${d.nextMileage.toLocaleString()} mi</span>`
-        }
-      </td>
-    </tr>
-  `).join('')
+  const rows = dueItems.map(d => {
+    let rightCol
+    if (d.overdue) {
+      rightCol = `<span style="color:#d32f2f;font-weight:600">Overdue</span>`
+    } else if (d.reason === 'time') {
+      const dateStr = d.timeDueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      rightCol = `
+        <span style="color:#f57c00;font-weight:600">~${d.daysOut} day${d.daysOut === 1 ? '' : 's'}</span><br/>
+        <span style="color:#888;font-size:0.85em">by ${dateStr} (time limit)</span>`
+    } else {
+      rightCol = `
+        <span style="color:#f57c00;font-weight:600">~${d.daysOut} day${d.daysOut === 1 ? '' : 's'}</span><br/>
+        <span style="color:#888;font-size:0.85em">${d.nextMileage.toLocaleString()} mi</span>`
+    }
+
+    return `
+      <tr>
+        <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;font-size:1.2em">${d.icon}</td>
+        <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0">
+          <strong>${d.vehicle}</strong><br/>
+          <span style="color:#555">${d.label}</span>
+        </td>
+        <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;text-align:right;white-space:nowrap">
+          ${rightCol}
+        </td>
+      </tr>`
+  }).join('')
 
   return `
     <!DOCTYPE html>
@@ -95,7 +160,7 @@ function buildEmailHtml(userName, dueItems) {
           <p style="color:#333;margin:0 0 16px">Hi ${userName || 'there'},</p>
           <p style="color:#333;margin:0 0 20px">
             ${dueItems.length === 1 ? 'One of your vehicles has' : 'Some of your vehicles have'}
-            upcoming maintenance due soon:
+            maintenance due soon:
           </p>
           <table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:8px;overflow:hidden">
             ${rows}
@@ -106,8 +171,7 @@ function buildEmailHtml(userName, dueItems) {
         </div>
       </div>
     </body>
-    </html>
-  `
+    </html>`
 }
 
 async function run() {
@@ -125,29 +189,22 @@ async function run() {
     for (const vehicleDoc of vehiclesSnap.docs) {
       const vehicle = vehicleDoc.data()
       const vehicleId = vehicleDoc.id
-      if (!vehicle.dailyMiles || !vehicle.currentMileage) continue
 
-      const [lastRecords, intervals] = await Promise.all([
+      const [lastRecords, customIntervals] = await Promise.all([
         getLastRecords(uid, vehicleId),
-        getIntervals(uid, vehicleId),
+        getCustomIntervals(uid, vehicleId),
       ])
 
       const vehicleLabel = vehicle.nickname || `${vehicle.year} ${vehicle.make} ${vehicle.model}`
 
       for (const item of MAINTENANCE_ITEMS) {
-        const intervalMiles = intervals[item.id]?.miles ?? item.defaultIntervalMiles
-        if (!intervalMiles) continue
-
         const last = lastRecords[item.id]
-        const baseMileage = last?.mileage ?? vehicle.currentMileage
-        const nextMileage = baseMileage + intervalMiles
-        const milesRemaining = nextMileage - vehicle.currentMileage
-        const daysOut = Math.round(milesRemaining / vehicle.dailyMiles)
-        const overdue = milesRemaining <= 0
+        const info = calcDueInfo(item, last, vehicle, customIntervals, today)
 
-        if (!overdue && daysOut > NOTIFY_DAYS_AHEAD) continue
+        if (!info) continue
+        if (!info.overdue && info.daysOut > NOTIFY_DAYS_AHEAD) continue
 
-        // Check cooldown — don't spam
+        // Cooldown check — don't spam
         const lastNotified = await getLastNotified(uid, vehicleId, item.id)
         if (lastNotified) {
           const daysSince = (today - lastNotified) / (1000 * 60 * 60 * 24)
@@ -158,9 +215,7 @@ async function run() {
           vehicle: vehicleLabel,
           label: item.label,
           icon: item.icon,
-          nextMileage,
-          daysOut: Math.max(0, daysOut),
-          overdue,
+          ...info,
           uid,
           vehicleId,
           itemId: item.id,
@@ -184,7 +239,6 @@ async function run() {
 
     console.log(`Sent notification to ${email} for ${dueItems.length} item(s)`)
 
-    // Mark all as notified
     await Promise.all(dueItems.map(d => markNotified(d.uid, d.vehicleId, d.itemId)))
   }
 

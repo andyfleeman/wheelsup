@@ -15,21 +15,42 @@ function statusInfo(item, nextMileage, currentMileage, lastRecord) {
 }
 
 export default function MaintenanceCard({
-  item, lastRecord, nextMileage, currentMileage, intervalMiles, estimatedDate, onIntervalChange, onLog
+  item, lastRecord, nextMileage, currentMileage, intervalMiles, dueInfo, onIntervalChange, onLog
 }) {
   const [editingInterval, setEditingInterval] = useState(false)
   const [intervalInput, setIntervalInput] = useState(intervalMiles || item.defaultIntervalMiles || '')
   const [expanded, setExpanded] = useState(false)
 
-  const status = item.unit === 'miles'
+  const { estimatedDate, reason } = dueInfo || {}
+
+  const isTimeLimitSooner = reason === 'time'
+
+  // For time-only items (battery), derive a time-based status
+  const timeStatus = (() => {
+    if (!estimatedDate || !isTimeLimitSooner) return null
+    const today = new Date()
+    const daysOut = Math.round((estimatedDate - today) / (1000 * 60 * 60 * 24))
+    if (daysOut <= 0) return { label: 'Overdue (time limit)', color: '#d32f2f', pct: 0 }
+    if (daysOut <= 30) return { label: `Due in ${daysOut} days (time limit)`, color: '#f57c00', pct: Math.max(10, 100 - (daysOut / 30) * 100) }
+    return { label: `Due ${estimatedDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} (time limit)`, color: '#2e7d32', pct: 60 }
+  })()
+
+  const mileageStatus = item.unit === 'miles'
     ? statusInfo(item, nextMileage, currentMileage, lastRecord)
     : { label: item.defaultIntervalMonths ? `Every ${item.defaultIntervalMonths} months` : 'Time-based', color: '#1a73e8', pct: 50 }
+
+  // Use time status if it fires sooner
+  const status = (isTimeLimitSooner && timeStatus) ? timeStatus : mileageStatus
 
   const handleIntervalSave = () => {
     const val = Number(intervalInput)
     if (val > 0) onIntervalChange(val)
     setEditingInterval(false)
   }
+
+  const formattedDueDate = estimatedDate
+    ? estimatedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : null
 
   return (
     <div className="maintenance-card" style={{ '--status-color': status.color }}>
@@ -38,7 +59,7 @@ export default function MaintenanceCard({
         <div className="card-info">
           <div className="card-label">{item.label}</div>
           <div className="card-status" style={{ color: status.color }}>{status.label}</div>
-          {item.unit === 'miles' && status.pct > 0 && (
+          {status.pct > 0 && (
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: `${status.pct}%`, background: status.color }} />
             </div>
@@ -57,7 +78,7 @@ export default function MaintenanceCard({
           )}
           {item.unit === 'miles' && (
             <div className="detail-row interval-row">
-              <span>Interval</span>
+              <span>Mileage interval</span>
               {editingInterval ? (
                 <span className="interval-edit">
                   <input
@@ -77,10 +98,24 @@ export default function MaintenanceCard({
               )}
             </div>
           )}
-          {estimatedDate && (
+          {item.defaultIntervalMonths && (
+            <div className="detail-row">
+              <span>Time interval</span>
+              <span>{item.defaultIntervalMonths} months</span>
+            </div>
+          )}
+          {formattedDueDate && (
             <div className="detail-row">
               <span>Est. due date</span>
-              <span>{estimatedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              <span className={isTimeLimitSooner ? 'due-time-limit' : ''}>
+                {formattedDueDate}
+                {isTimeLimitSooner ? ' ⏱' : ''}
+              </span>
+            </div>
+          )}
+          {!lastRecord && item.defaultIntervalMonths && (
+            <div className="time-hint">
+              Log your last service to enable time-based reminders
             </div>
           )}
           {lastRecord?.notes && (

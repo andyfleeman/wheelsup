@@ -34,16 +34,35 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
     return baseMileage + interval
   }
 
-  const getEstimatedDate = (item) => {
-    if (!vehicle.dailyMiles) return null
-    const next = getNextMileage(item)
-    if (!next) return null
-    const milesRemaining = next - currentMileage
-    if (milesRemaining <= 0) return null
-    const daysOut = Math.round(milesRemaining / vehicle.dailyMiles)
-    const date = new Date()
-    date.setDate(date.getDate() + daysOut)
-    return date
+  const getDueInfo = (item) => {
+    const last = getLastRecord(item.id)
+
+    // Mileage-based due date
+    let mileageDate = null
+    if (vehicle.dailyMiles) {
+      const next = getNextMileage(item)
+      if (next) {
+        const milesRemaining = next - currentMileage
+        if (milesRemaining > 0) {
+          mileageDate = new Date()
+          mileageDate.setDate(mileageDate.getDate() + Math.round(milesRemaining / vehicle.dailyMiles))
+        }
+      }
+    }
+
+    // Time-based due date — requires a logged service to anchor from
+    let timeDate = null
+    if (item.defaultIntervalMonths && last?.date) {
+      timeDate = new Date(last.date)
+      timeDate.setMonth(timeDate.getMonth() + item.defaultIntervalMonths)
+    }
+
+    if (!mileageDate && !timeDate) return { estimatedDate: null, reason: null }
+    if (!mileageDate) return { estimatedDate: timeDate, reason: 'time' }
+    if (!timeDate) return { estimatedDate: mileageDate, reason: 'mileage' }
+    return mileageDate <= timeDate
+      ? { estimatedDate: mileageDate, reason: 'mileage' }
+      : { estimatedDate: timeDate, reason: 'time' }
   }
 
   const handleUpdateMileage = async () => {
@@ -118,7 +137,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
             nextMileage={getNextMileage(item)}
             currentMileage={currentMileage}
             intervalMiles={getInterval(item)}
-            estimatedDate={getEstimatedDate(item)}
+            dueInfo={getDueInfo(item)}
             onIntervalChange={(miles) => handleIntervalChange(item.id, miles)}
             onLog={() => setLogItem(item)}
           />
