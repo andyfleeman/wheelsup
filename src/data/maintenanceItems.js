@@ -7,6 +7,10 @@ export const MAINTENANCE_ITEMS = [
     defaultIntervalMonths: 6,
     unit: 'miles',
     description: 'Engine oil & filter replacement',
+    subItems: [
+      { id: 'oil',    label: 'Engine oil replaced' },
+      { id: 'filter', label: 'Oil filter replaced' },
+    ],
   },
   {
     id: 'tire_rotation',
@@ -16,15 +20,25 @@ export const MAINTENANCE_ITEMS = [
     defaultIntervalMonths: 6,
     unit: 'miles',
     description: 'Rotate tires for even wear',
+    resetAction: { label: 'New Tires Installed' },
   },
   {
     id: 'air_filter',
-    label: 'Air Filter',
+    label: 'Engine Air Filter',
     icon: '💨',
     defaultIntervalMiles: 20000,
     defaultIntervalMonths: 24,
     unit: 'miles',
     description: 'Engine air filter replacement',
+  },
+  {
+    id: 'cabin_air_filter',
+    label: 'Cabin Air Filter',
+    icon: '🌬️',
+    defaultIntervalMiles: 15000,
+    defaultIntervalMonths: 12,
+    unit: 'miles',
+    description: 'Cabin/passenger compartment air filter',
   },
   {
     id: 'battery',
@@ -34,6 +48,16 @@ export const MAINTENANCE_ITEMS = [
     defaultIntervalMonths: 48,
     unit: 'months',
     description: 'Battery inspection/replacement',
+    resetAction: { label: 'New Battery Installed' },
+  },
+  {
+    id: 'brake_fluid',
+    label: 'Brake Fluid',
+    icon: '🛑',
+    defaultIntervalMiles: 30000,
+    defaultIntervalMonths: 24,
+    unit: 'miles',
+    description: 'Brake fluid flush — absorbs moisture over time, critical for safety',
   },
   {
     id: 'transmission_fluid',
@@ -44,18 +68,58 @@ export const MAINTENANCE_ITEMS = [
     unit: 'miles',
     description: 'Transmission fluid change',
   },
+  {
+    id: 'coolant_flush',
+    label: 'Coolant Flush',
+    icon: '🌡️',
+    defaultIntervalMiles: 50000,
+    defaultIntervalMonths: 60,
+    unit: 'miles',
+    description: 'Engine coolant flush and refill',
+  },
+  {
+    id: 'spark_plugs',
+    label: 'Spark Plugs',
+    icon: '⚡',
+    defaultIntervalMiles: 30000,
+    defaultIntervalMonths: 36,
+    unit: 'miles',
+    description: 'Spark plug replacement (adjust interval for iridium/platinum)',
+  },
+  {
+    id: 'wiper_blades',
+    label: 'Wiper Blades',
+    icon: '🌧️',
+    defaultIntervalMiles: 12000,
+    defaultIntervalMonths: 12,
+    unit: 'miles',
+    description: 'Windshield wiper blade replacement',
+  },
 ]
 
-// Oil type recommendations by engine type
-export const OIL_RECOMMENDATIONS = {
-  default: {
-    conventional: { viscosity: '5W-30', type: 'Conventional', notes: 'Standard recommendation' },
-    synthetic: { viscosity: '5W-30', type: 'Full Synthetic', notes: 'Extended drain interval' },
-  },
-  diesel: { viscosity: '15W-40', type: 'Diesel', notes: 'CK-4 rated diesel oil required' },
+// Oil spec lookup by make/engine
+export const OIL_SPECS = {
+  Toyota:           { default: '0W-20 Full Synthetic',                   Diesel: '5W-30 Diesel' },
+  Honda:            { default: '0W-20 Full Synthetic',                   Diesel: '5W-30 Diesel' },
+  Ford:             { default: '5W-30 Full Synthetic',                   Diesel: '15W-40 Diesel', 'Turbocharged 4-Cylinder': '5W-30 Full Synthetic' },
+  Chevrolet:        { default: '5W-30 Conventional/Synthetic',           Diesel: '15W-40 Diesel' },
+  GMC:              { default: '5W-30 Conventional/Synthetic',           Diesel: '15W-40 Diesel' },
+  Dodge:            { default: '5W-20 Conventional/Synthetic',           Diesel: '15W-40 Diesel' },
+  Ram:              { default: '5W-20 Full Synthetic',                   Diesel: '15W-40 Diesel' },
+  Jeep:             { default: '5W-20 Conventional/Synthetic' },
+  Nissan:           { default: '5W-30 Full Synthetic' },
+  Hyundai:          { default: '5W-30 Full Synthetic' },
+  Kia:              { default: '5W-30 Full Synthetic' },
+  Subaru:           { default: '0W-20 Full Synthetic' },
+  BMW:              { default: '5W-30 Full Synthetic (BMW LL-01)',        Diesel: '5W-30 Diesel Full Synthetic' },
+  'Mercedes-Benz':  { default: '5W-40 Full Synthetic (MB 229.5)' },
+  Audi:             { default: '5W-40 Full Synthetic (VW 502.00)' },
+  Volkswagen:       { default: '5W-40 Full Synthetic (VW 502.00)' },
+  Lexus:            { default: '0W-20 Full Synthetic' },
+  Acura:            { default: '0W-20 Full Synthetic' },
+  default:          { default: "5W-30 Conventional (verify owner's manual)" },
 }
 
-// Common engine types
 export const ENGINE_TYPES = [
   '4-Cylinder (Gas)',
   '6-Cylinder (Gas)',
@@ -66,29 +130,6 @@ export const ENGINE_TYPES = [
   'Turbocharged 4-Cylinder',
   'Turbocharged 6-Cylinder',
 ]
-
-// Oil spec lookup by make/engine — covers the most common combos
-export const OIL_SPECS = {
-  Toyota: { default: '0W-20 Full Synthetic', Diesel: '5W-30 Diesel' },
-  Honda: { default: '0W-20 Full Synthetic', Diesel: '5W-30 Diesel' },
-  Ford: { default: '5W-30 Full Synthetic', 'Diesel': '15W-40 Diesel', 'Turbocharged 4-Cylinder': '5W-30 Full Synthetic' },
-  Chevrolet: { default: '5W-30 Conventional/Synthetic', Diesel: '15W-40 Diesel' },
-  GMC: { default: '5W-30 Conventional/Synthetic', Diesel: '15W-40 Diesel' },
-  Dodge: { default: '5W-20 Conventional/Synthetic', Diesel: '15W-40 Diesel' },
-  Ram: { default: '5W-20 Full Synthetic', Diesel: '15W-40 Diesel' },
-  Jeep: { default: '5W-20 Conventional/Synthetic' },
-  Nissan: { default: '5W-30 Full Synthetic' },
-  Hyundai: { default: '5W-30 Full Synthetic' },
-  Kia: { default: '5W-30 Full Synthetic' },
-  Subaru: { default: '0W-20 Full Synthetic' },
-  BMW: { default: '5W-30 Full Synthetic (BMW LL-01)', 'Diesel': '5W-30 Diesel Full Synthetic' },
-  'Mercedes-Benz': { default: '5W-40 Full Synthetic (MB 229.5)' },
-  Audi: { default: '5W-40 Full Synthetic (VW 502.00)' },
-  Volkswagen: { default: '5W-40 Full Synthetic (VW 502.00)' },
-  Lexus: { default: '0W-20 Full Synthetic' },
-  Acura: { default: '0W-20 Full Synthetic' },
-  default: { default: '5W-30 Conventional (verify owner\'s manual)' },
-}
 
 export function getOilSpec(make, engineType) {
   const makeSpecs = OIL_SPECS[make] || OIL_SPECS.default

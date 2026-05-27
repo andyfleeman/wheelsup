@@ -15,17 +15,15 @@ function statusInfo(item, nextMileage, currentMileage, lastRecord) {
 }
 
 export default function MaintenanceCard({
-  item, lastRecord, nextMileage, currentMileage, intervalMiles, dueInfo, onIntervalChange, onLog
+  item, lastRecord, nextMileage, currentMileage, intervalMiles, dueInfo, onIntervalChange, onLog, onReset
 }) {
   const [editingInterval, setEditingInterval] = useState(false)
   const [intervalInput, setIntervalInput] = useState(intervalMiles || item.defaultIntervalMiles || '')
   const [expanded, setExpanded] = useState(false)
 
   const { estimatedDate, reason } = dueInfo || {}
-
   const isTimeLimitSooner = reason === 'time'
 
-  // For time-only items (battery), derive a time-based status
   const timeStatus = (() => {
     if (!estimatedDate || !isTimeLimitSooner) return null
     const today = new Date()
@@ -39,7 +37,6 @@ export default function MaintenanceCard({
     ? statusInfo(item, nextMileage, currentMileage, lastRecord)
     : { label: item.defaultIntervalMonths ? `Every ${item.defaultIntervalMonths} months` : 'Time-based', color: '#1a73e8', pct: 50 }
 
-  // Use time status if it fires sooner
   const status = (isTimeLimitSooner && timeStatus) ? timeStatus : mileageStatus
 
   const handleIntervalSave = () => {
@@ -50,6 +47,10 @@ export default function MaintenanceCard({
 
   const formattedDueDate = estimatedDate
     ? estimatedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : null
+
+  const lastDoneDate = lastRecord?.date
+    ? new Date(lastRecord.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null
 
   return (
@@ -71,11 +72,20 @@ export default function MaintenanceCard({
       {expanded && (
         <div className="card-detail">
           {lastRecord && (
-            <div className="detail-row">
-              <span>Last done at</span>
-              <span>{lastRecord.mileage.toLocaleString()} mi</span>
-            </div>
+            <>
+              <div className="detail-row">
+                <span>Last done at</span>
+                <span>{lastRecord.mileage.toLocaleString()} mi</span>
+              </div>
+              {lastDoneDate && (
+                <div className="detail-row">
+                  <span>Last done on</span>
+                  <span>{lastDoneDate}</span>
+                </div>
+              )}
+            </>
           )}
+
           {item.unit === 'miles' && (
             <div className="detail-row interval-row">
               <span>Mileage interval</span>
@@ -98,35 +108,46 @@ export default function MaintenanceCard({
               )}
             </div>
           )}
+
           {item.defaultIntervalMonths && (
             <div className="detail-row">
               <span>Time interval</span>
               <span>{item.defaultIntervalMonths} months</span>
             </div>
           )}
+
           {formattedDueDate && (
             <div className="detail-row">
               <span>Est. due date</span>
               <span className={isTimeLimitSooner ? 'due-time-limit' : ''}>
-                {formattedDueDate}
-                {isTimeLimitSooner ? ' ⏱' : ''}
+                {formattedDueDate}{isTimeLimitSooner ? ' ⏱' : ''}
               </span>
             </div>
           )}
+
           {!lastRecord && item.defaultIntervalMonths && (
             <div className="time-hint">
               Log your last service to enable time-based reminders
             </div>
           )}
+
           {lastRecord?.notes && (
             <div className="detail-row">
               <span>Notes</span>
               <span>{lastRecord.notes}</span>
             </div>
           )}
-          <button className="log-btn" onClick={() => { setExpanded(false); onLog() }}>
-            Log Service Done
-          </button>
+
+          <div className="card-actions">
+            <button className="log-btn" onClick={() => { setExpanded(false); onLog() }}>
+              Log Service Done
+            </button>
+            {item.resetAction && (
+              <button className="reset-btn" onClick={() => { setExpanded(false); onReset() }}>
+                {item.resetAction.label}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

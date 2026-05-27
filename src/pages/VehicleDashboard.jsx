@@ -4,27 +4,28 @@ import { MAINTENANCE_ITEMS } from '../data/maintenanceItems'
 import { saveMaintenanceRecord, getMaintenanceRecords, saveInterval, getIntervals, saveVehicle } from '../services/db'
 import MaintenanceCard from '../components/MaintenanceCard'
 import LogServiceModal from '../components/LogServiceModal'
+import LogbookPage from './LogbookPage'
 import './VehicleDashboard.css'
 
 export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   const { user } = useAuth()
-  const [records, setRecords] = useState([])
-  const [intervals, setIntervals] = useState({})
+  const [records, setRecords]           = useState([])
+  const [intervals, setIntervals]       = useState({})
   const [currentMileage, setCurrentMileage] = useState(vehicle.currentMileage)
   const [editingMileage, setEditingMileage] = useState(false)
   const [mileageInput, setMileageInput] = useState(vehicle.currentMileage)
-  const [logItem, setLogItem] = useState(null)
+  const [logItem, setLogItem]           = useState(null)
+  const [resetItem, setResetItem]       = useState(null)
+  const [tab, setTab]                   = useState('schedule') // 'schedule' | 'logbook'
 
   useEffect(() => {
     getMaintenanceRecords(user.uid, vehicle.id).then(setRecords)
     getIntervals(user.uid, vehicle.id).then(setIntervals)
   }, [user.uid, vehicle.id])
 
-  const getLastRecord = (itemId) =>
-    records.find(r => r.itemId === itemId)
+  const getLastRecord = (itemId) => records.find(r => r.itemId === itemId)
 
-  const getInterval = (item) =>
-    intervals[item.id]?.miles ?? item.defaultIntervalMiles
+  const getInterval = (item) => intervals[item.id]?.miles ?? item.defaultIntervalMiles
 
   const getNextMileage = (item) => {
     const last = getLastRecord(item.id)
@@ -37,7 +38,6 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   const getDueInfo = (item) => {
     const last = getLastRecord(item.id)
 
-    // Mileage-based due date
     let mileageDate = null
     if (vehicle.dailyMiles) {
       const next = getNextMileage(item)
@@ -50,7 +50,6 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
       }
     }
 
-    // Time-based due date — requires a logged service to anchor from
     let timeDate = null
     if (item.defaultIntervalMonths && last?.date) {
       timeDate = new Date(last.date)
@@ -59,10 +58,10 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
 
     if (!mileageDate && !timeDate) return { estimatedDate: null, reason: null }
     if (!mileageDate) return { estimatedDate: timeDate, reason: 'time' }
-    if (!timeDate) return { estimatedDate: mileageDate, reason: 'mileage' }
+    if (!timeDate)    return { estimatedDate: mileageDate, reason: 'mileage' }
     return mileageDate <= timeDate
       ? { estimatedDate: mileageDate, reason: 'mileage' }
-      : { estimatedDate: timeDate, reason: 'time' }
+      : { estimatedDate: timeDate,   reason: 'time' }
   }
 
   const handleUpdateMileage = async () => {
@@ -74,8 +73,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   }
 
   const handleIntervalChange = async (itemId, miles) => {
-    const updated = { ...intervals, [itemId]: { miles } }
-    setIntervals(updated)
+    setIntervals(prev => ({ ...prev, [itemId]: { miles } }))
     await saveInterval(user.uid, vehicle.id, itemId, { miles })
   }
 
@@ -88,11 +86,10 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
       await saveVehicle(user.uid, { ...vehicle, currentMileage: record.mileage })
     }
     setLogItem(null)
+    setResetItem(null)
   }
 
-  const vehicleLabel = vehicle.nickname
-    ? vehicle.nickname
-    : `${vehicle.year} ${vehicle.make} ${vehicle.model}`
+  const vehicleLabel = vehicle.nickname || `${vehicle.year} ${vehicle.make} ${vehicle.model}`
 
   return (
     <div className="vehicle-dashboard">
@@ -128,21 +125,43 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
         )}
       </div>
 
-      <div className="cards-list">
-        {MAINTENANCE_ITEMS.map(item => (
-          <MaintenanceCard
-            key={item.id}
-            item={item}
-            lastRecord={getLastRecord(item.id)}
-            nextMileage={getNextMileage(item)}
-            currentMileage={currentMileage}
-            intervalMiles={getInterval(item)}
-            dueInfo={getDueInfo(item)}
-            onIntervalChange={(miles) => handleIntervalChange(item.id, miles)}
-            onLog={() => setLogItem(item)}
-          />
-        ))}
+      <div className="dashboard-tabs">
+        <button
+          className={`dash-tab ${tab === 'schedule' ? 'active' : ''}`}
+          onClick={() => setTab('schedule')}
+        >
+          Service Schedule
+        </button>
+        <button
+          className={`dash-tab ${tab === 'logbook' ? 'active' : ''}`}
+          onClick={() => setTab('logbook')}
+        >
+          Logbook {records.length > 0 && <span className="tab-badge">{records.length}</span>}
+        </button>
       </div>
+
+      {tab === 'schedule' && (
+        <div className="cards-list">
+          {MAINTENANCE_ITEMS.map(item => (
+            <MaintenanceCard
+              key={item.id}
+              item={item}
+              lastRecord={getLastRecord(item.id)}
+              nextMileage={getNextMileage(item)}
+              currentMileage={currentMileage}
+              intervalMiles={getInterval(item)}
+              dueInfo={getDueInfo(item)}
+              onIntervalChange={(miles) => handleIntervalChange(item.id, miles)}
+              onLog={() => setLogItem(item)}
+              onReset={item.resetAction ? () => setResetItem(item) : undefined}
+            />
+          ))}
+        </div>
+      )}
+
+      {tab === 'logbook' && (
+        <LogbookPage vehicle={{ ...vehicle, currentMileage }} records={records} />
+      )}
 
       {logItem && (
         <LogServiceModal
@@ -150,6 +169,17 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
           currentMileage={currentMileage}
           onSave={handleLogService}
           onClose={() => setLogItem(null)}
+          resetMode={false}
+        />
+      )}
+
+      {resetItem && (
+        <LogServiceModal
+          item={resetItem}
+          currentMileage={currentMileage}
+          onSave={handleLogService}
+          onClose={() => setResetItem(null)}
+          resetMode={true}
         />
       )}
     </div>

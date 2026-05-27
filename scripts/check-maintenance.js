@@ -7,13 +7,17 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 const NOTIFY_DAYS_AHEAD = 7    // warn this many days before estimated due date
 const NOTIFY_COOLDOWN_DAYS = 5 // don't re-notify within this window
 
-// All items — both mileage and time intervals included
 const MAINTENANCE_ITEMS = [
-  { id: 'oil_change',         label: 'Oil Change',         icon: '🛢️', defaultIntervalMiles: 5000,  defaultIntervalMonths: 6  },
-  { id: 'tire_rotation',      label: 'Tire Rotation',      icon: '🔄', defaultIntervalMiles: 7500,  defaultIntervalMonths: 6  },
-  { id: 'air_filter',         label: 'Air Filter',         icon: '💨', defaultIntervalMiles: 20000, defaultIntervalMonths: 24 },
-  { id: 'battery',            label: 'Battery',            icon: '🔋', defaultIntervalMiles: null,  defaultIntervalMonths: 48 },
-  { id: 'transmission_fluid', label: 'Transmission Fluid', icon: '⚙️', defaultIntervalMiles: 45000, defaultIntervalMonths: 36 },
+  { id: 'oil_change',         label: 'Oil Change',          icon: '🛢️', defaultIntervalMiles: 5000,  defaultIntervalMonths: 6  },
+  { id: 'tire_rotation',      label: 'Tire Rotation',       icon: '🔄', defaultIntervalMiles: 7500,  defaultIntervalMonths: 6  },
+  { id: 'air_filter',         label: 'Engine Air Filter',   icon: '💨', defaultIntervalMiles: 20000, defaultIntervalMonths: 24 },
+  { id: 'cabin_air_filter',   label: 'Cabin Air Filter',    icon: '🌬️', defaultIntervalMiles: 15000, defaultIntervalMonths: 12 },
+  { id: 'battery',            label: 'Battery',             icon: '🔋', defaultIntervalMiles: null,  defaultIntervalMonths: 48 },
+  { id: 'brake_fluid',        label: 'Brake Fluid',         icon: '🛑', defaultIntervalMiles: 30000, defaultIntervalMonths: 24 },
+  { id: 'transmission_fluid', label: 'Transmission Fluid',  icon: '⚙️', defaultIntervalMiles: 45000, defaultIntervalMonths: 36 },
+  { id: 'coolant_flush',      label: 'Coolant Flush',       icon: '🌡️', defaultIntervalMiles: 50000, defaultIntervalMonths: 60 },
+  { id: 'spark_plugs',        label: 'Spark Plugs',         icon: '⚡', defaultIntervalMiles: 30000, defaultIntervalMonths: 36 },
+  { id: 'wiper_blades',       label: 'Wiper Blades',        icon: '🌧️', defaultIntervalMiles: 12000, defaultIntervalMonths: 12 },
 ]
 
 function initFirebase() {

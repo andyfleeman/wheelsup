@@ -124,6 +124,13 @@
   padding: 0.25rem 0;
 }
 
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
 .log-btn {
   width: 100%;
   padding: 0.75rem;
@@ -134,7 +141,20 @@
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 0.25rem;
 }
 
 .log-btn:hover { background: #1557b0; }
+
+.reset-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: white;
+  color: #1a73e8;
+  border: 1.5px solid #1a73e8;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reset-btn:hover { background: #f0f4ff; }
