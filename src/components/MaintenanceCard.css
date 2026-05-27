@@ -1,0 +1,128 @@
+.maintenance-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  border-left: 4px solid var(--status-color, #ddd);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.card-icon {
+  font-size: 1.75rem;
+  min-width: 2rem;
+  text-align: center;
+}
+
+.card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+}
+
+.card-status {
+  font-size: 0.85rem;
+  margin-top: 0.1rem;
+}
+
+.progress-bar {
+  height: 4px;
+  background: #eee;
+  border-radius: 2px;
+  margin-top: 0.4rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.card-chevron {
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+.card-detail {
+  border-top: 1px solid #f0f0f0;
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.detail-row span:first-child {
+  color: #888;
+}
+
+.detail-row span:last-child {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.interval-value {
+  cursor: pointer;
+  color: #1a73e8 !important;
+}
+
+.interval-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.interval-edit input {
+  width: 80px;
+  padding: 0.3rem 0.5rem;
+  border: 1.5px solid #1a73e8;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.interval-edit button {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+
+.interval-edit button:hover { background: #f0f4ff; }
+
+.log-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.25rem;
+}
+
+.log-btn:hover { background: #1557b0; }
