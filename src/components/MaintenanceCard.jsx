@@ -15,7 +15,7 @@ function statusInfo(item, nextMileage, currentMileage, lastRecord) {
 }
 
 export default function MaintenanceCard({
-  item, lastRecord, nextMileage, currentMileage, intervalMiles, onIntervalChange, onLog
+  item, lastRecord, nextMileage, currentMileage, intervalMiles, estimatedDate, onIntervalChange, onLog
 }) {
   const [editingInterval, setEditingInterval] = useState(false)
   const [intervalInput, setIntervalInput] = useState(intervalMiles || item.defaultIntervalMiles || '')
@@ -75,6 +75,12 @@ export default function MaintenanceCard({
                   {(intervalMiles || item.defaultIntervalMiles || '—').toLocaleString()} mi ✏️
                 </span>
               )}
+            </div>
+          )}
+          {estimatedDate && (
+            <div className="detail-row">
+              <span>Est. due date</span>
+              <span>{estimatedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
             </div>
           )}
           {lastRecord?.notes && (

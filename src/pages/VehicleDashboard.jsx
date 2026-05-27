@@ -34,6 +34,18 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
     return baseMileage + interval
   }
 
+  const getEstimatedDate = (item) => {
+    if (!vehicle.dailyMiles) return null
+    const next = getNextMileage(item)
+    if (!next) return null
+    const milesRemaining = next - currentMileage
+    if (milesRemaining <= 0) return null
+    const daysOut = Math.round(milesRemaining / vehicle.dailyMiles)
+    const date = new Date()
+    date.setDate(date.getDate() + daysOut)
+    return date
+  }
+
   const handleUpdateMileage = async () => {
     const val = Number(mileageInput)
     if (!val || val < 0) return
@@ -106,6 +118,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
             nextMileage={getNextMileage(item)}
             currentMileage={currentMileage}
             intervalMiles={getInterval(item)}
+            estimatedDate={getEstimatedDate(item)}
             onIntervalChange={(miles) => handleIntervalChange(item.id, miles)}
             onLog={() => setLogItem(item)}
           />

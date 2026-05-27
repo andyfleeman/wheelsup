@@ -15,6 +15,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
     year: '',
     engineType: '',
     currentMileage: '',
+    dailyMiles: '',
     nickname: '',
     ...(existing || {}),
   })
@@ -51,6 +52,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
       await saveVehicle(user.uid, {
         ...form,
         currentMileage: Number(form.currentMileage),
+        dailyMiles: form.dailyMiles ? Number(form.dailyMiles) : null,
         year: Number(form.year),
       })
       onSaved()
@@ -137,6 +139,18 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
             min="0"
             required
           />
+        </label>
+
+        <label>
+          Average Daily Miles
+          <input
+            type="number"
+            placeholder="e.g. 62 (used to estimate service dates)"
+            value={form.dailyMiles}
+            onChange={e => set('dailyMiles', e.target.value)}
+            min="1"
+          />
+          <span className="field-hint">Used to predict when your next service is due</span>
         </label>
 
         <button type="submit" className="primary-btn" disabled={saving}>
