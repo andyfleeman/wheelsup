@@ -1,55 +1,63 @@
 .garage-page {
   min-height: 100vh;
   padding-bottom: 5rem;
-  background: #f0f0f0;
+  background: #f2f2f2;
 }
 
 .garage-header {
   background: #1c1c1e;
-  color: white;
-  padding: 1.5rem 1rem 1.25rem;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  padding: 1rem 1rem 1.5rem;
   border-bottom: 3px solid #c62828;
 }
 
-.garage-header h1 {
-  margin: 0;
-  font-size: 1.6rem;
-  font-weight: 800;
+.garage-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.garage-wordmark {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #c62828;
   letter-spacing: -0.02em;
 }
 
-.garage-subtitle {
-  margin: 0.15rem 0 0;
-  font-size: 0.8rem;
-  opacity: 0.55;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
 .logout-btn {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.8);
-  padding: 0.4rem 0.875rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.6);
+  padding: 0.35rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
-  margin-top: 0.25rem;
-  transition: background 0.15s;
+  transition: all 0.15s;
 }
 
 .logout-btn:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.14);
   color: white;
+}
+
+.garage-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.03em;
+}
+
+.garage-body {
+  padding: 1rem;
 }
 
 .loading {
   text-align: center;
   color: #888;
   padding: 3rem;
+  font-size: 0.9rem;
 }
 
 .empty-state {
@@ -57,29 +65,33 @@
   padding: 4rem 2rem;
 }
 
-.empty-icon {
+.empty-badge {
   display: inline-block;
-  padding: 0.4rem 0.875rem;
-  background: #1c1c1e;
-  color: rgba(255,255,255,0.5);
+  padding: 0.3rem 0.75rem;
+  background: #e0e0e0;
+  color: #888;
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.12em;
   border-radius: 4px;
   margin-bottom: 1.25rem;
+  text-transform: uppercase;
 }
 
 .empty-state h3 {
   margin: 0 0 0.5rem;
   color: #1a1a1a;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 700;
 }
 
-.empty-state p { color: #888; margin: 0; }
+.empty-state p {
+  color: #888;
+  margin: 0;
+  font-size: 0.9rem;
+}
 
 .vehicle-list {
-  padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -87,96 +99,144 @@
 
 .vehicle-card {
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  overflow: hidden;
-  border-left: 4px solid #1c1c1e;
-}
-
-.vehicle-card-main {
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03);
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 1rem;
   cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.1s;
+  border-left: 4px solid #1c1c1e;
 }
 
-.vehicle-card-main:hover { background: #fafafa; }
+.vehicle-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04);
+  transform: translateY(-1px);
+}
 
-.vehicle-icon {
-  width: 44px;
-  height: 44px;
+.vehicle-card:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.vehicle-badge {
+  width: 48px;
+  height: 48px;
   background: #1c1c1e;
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  font-weight: 800;
+  font-size: 1.2rem;
+  font-weight: 900;
   color: white;
   flex-shrink: 0;
   letter-spacing: -0.02em;
 }
 
-.vehicle-info { flex: 1; }
+.vehicle-info {
+  flex: 1;
+  min-width: 0;
+}
 
 .vehicle-name {
   font-weight: 700;
   font-size: 1rem;
   color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .vehicle-sub {
-  font-size: 0.8rem;
-  color: #888;
+  font-size: 0.78rem;
+  color: #999;
   margin-top: 0.1rem;
 }
 
-.vehicle-mileage {
-  font-size: 0.85rem;
-  color: #c62828;
-  font-weight: 600;
-  margin-top: 0.2rem;
+.vehicle-meta {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  flex-wrap: wrap;
 }
 
-.vehicle-arrow {
-  font-size: 1.25rem;
-  color: #ccc;
-  font-weight: 300;
+.vehicle-mileage-chip {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  background: rgba(198,40,40,0.08);
+  color: #c62828;
+  border: 1px solid rgba(198,40,40,0.15);
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.vehicle-engine-chip {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  background: #f0f0f0;
+  color: #777;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.vehicle-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .delete-btn {
-  width: 100%;
   background: none;
   border: none;
-  border-top: 1px solid #f0f0f0;
-  padding: 0.5rem;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
   cursor: pointer;
-  color: #c62828;
-  opacity: 0.6;
+  color: #ccc;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  transition: color 0.15s;
 }
 
-.delete-btn:hover { opacity: 1; background: #fff5f5; }
+.delete-btn:hover { color: #c62828; }
+
+.vehicle-arrow {
+  font-size: 1.4rem;
+  color: #d0d0d0;
+  line-height: 1;
+}
 
 .fab {
   position: fixed;
   bottom: 1.5rem;
-  right: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
   background: #c62828;
   color: white;
   border: none;
   border-radius: 28px;
-  padding: 0.875rem 1.5rem;
+  padding: 0.95rem 2rem;
   font-size: 1rem;
   font-weight: 700;
-  box-shadow: 0 4px 16px rgba(198,40,40,0.4);
+  box-shadow: 0 4px 20px rgba(198,40,40,0.45);
   cursor: pointer;
   z-index: 50;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
   letter-spacing: 0.01em;
+  white-space: nowrap;
+  max-width: calc(480px - 3rem);
 }
 
-.fab:hover { background: #b71c1c; }
+.fab:hover {
+  background: #b71c1c;
+  box-shadow: 0 6px 24px rgba(198,40,40,0.5);
+}
+
+.fab:active { transform: translateX(-50%) scale(0.98); }

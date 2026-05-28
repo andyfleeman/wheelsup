@@ -1,36 +1,61 @@
 .maintenance-card {
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03);
   overflow: hidden;
-  border-left: 4px solid var(--status-color, #ddd);
+  border-left: 4px solid var(--border-color, #ddd);
+  transition: box-shadow 0.2s;
 }
 
 .card-top {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
   padding: 1rem;
   cursor: pointer;
   user-select: none;
 }
 
-.card-info {
-  flex: 1;
-  min-width: 0;
+.card-info { width: 100%; }
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
 }
 
 .card-label {
   font-weight: 700;
   font-size: 0.95rem;
   color: #1a1a1a;
-  letter-spacing: 0.01em;
 }
 
-.card-status {
-  font-size: 0.82rem;
-  margin-top: 0.15rem;
-  font-weight: 500;
+.card-chevron {
+  font-size: 1rem;
+  color: #ccc;
+  transition: transform 0.2s ease;
+  line-height: 1;
+}
+
+.card-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 100px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.days-chip {
+  font-size: 0.73rem;
+  font-weight: 600;
 }
 
 .card-time-warning {
@@ -41,64 +66,90 @@
 }
 
 .progress-bar {
-  height: 3px;
+  height: 5px;
   background: #eee;
-  border-radius: 2px;
-  margin-top: 0.45rem;
+  border-radius: 3px;
+  margin-top: 0.6rem;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  border-radius: 2px;
-  transition: width 0.3s;
+  border-radius: 3px;
+  transition: width 0.4s ease;
 }
 
-.card-chevron {
+.time-limit-chip {
   font-size: 0.7rem;
-  color: #bbb;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  opacity: 0.85;
 }
 
+/* ── Expanded detail ── */
 .card-detail {
   border-top: 1px solid #f0f0f0;
-  padding: 0.875rem 1rem;
+  padding: 0.875rem 1rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   background: #fafafa;
 }
 
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .detail-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-size: 0.875rem;
-  color: #555;
+  align-items: flex-start;
+  font-size: 0.85rem;
+  gap: 0.75rem;
 }
 
-.detail-row span:first-child {
-  color: #888;
-  font-size: 0.8rem;
+.detail-key {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #bbb;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+  padding-top: 0.05rem;
 }
 
-.detail-row span:last-child {
+.detail-val {
   font-weight: 600;
   color: #1a1a1a;
+  text-align: right;
 }
+
+.notes-val {
+  font-weight: 400;
+  color: #666;
+  font-style: italic;
+}
+
+.val-warning { color: #e65100; }
 
 .interval-value {
   cursor: pointer;
-  color: #c62828 !important;
-  font-size: 0.82rem !important;
+  color: #c62828;
+  font-weight: 600;
+}
+
+.edit-hint {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #bbb;
 }
 
 .interval-edit {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.35rem;
 }
 
 .interval-edit input {
@@ -106,30 +157,39 @@
   padding: 0.3rem 0.5rem;
   border: 1.5px solid #c62828;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   text-align: right;
+  outline: none;
 }
 
-.interval-edit button {
-  background: none;
-  border: none;
+.interval-unit {
   font-size: 0.8rem;
+  color: #888;
+}
+
+.interval-save-btn {
+  background: #c62828;
+  color: white;
+  border: none;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  color: #555;
+  padding: 0.25rem 0.6rem;
+  border-radius: 5px;
 }
 
-.interval-edit button:hover { background: #f0f0f0; }
-
-.due-time-limit {
-  color: #e65100 !important;
+.interval-cancel-btn {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #bbb;
+  padding: 0.1rem 0.25rem;
 }
 
 .time-hint {
-  font-size: 0.8rem;
-  color: #999;
+  font-size: 0.78rem;
+  color: #bbb;
   font-style: italic;
   text-align: center;
   padding: 0.25rem 0;
@@ -137,39 +197,41 @@
 
 .card-actions {
   display: flex;
-  flex-direction: column;
   gap: 0.5rem;
-  margin-top: 0.25rem;
+  padding-top: 0.25rem;
 }
 
 .log-btn {
-  width: 100%;
-  padding: 0.75rem;
+  flex: 2;
+  padding: 0.8rem;
   background: #c62828;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  letter-spacing: 0.02em;
   transition: background 0.15s;
+  letter-spacing: 0.01em;
 }
 
 .log-btn:hover { background: #b71c1c; }
 
 .reset-btn {
-  width: 100%;
-  padding: 0.75rem;
+  flex: 1;
+  padding: 0.8rem;
   background: white;
   color: #1a1a1a;
-  border: 1.5px solid #1c1c1e;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  letter-spacing: 0.02em;
-  transition: background 0.15s;
+  transition: all 0.15s;
+  letter-spacing: 0.01em;
 }
 
-.reset-btn:hover { background: #f0f0f0; }
+.reset-btn:hover {
+  border-color: #1c1c1e;
+  background: #f8f8f8;
+}

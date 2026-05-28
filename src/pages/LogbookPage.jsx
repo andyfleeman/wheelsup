@@ -7,7 +7,6 @@ function serviceLabel(record) {
   if (record.type === 'reset' && record.resetLabel) return record.resetLabel
   const item = ITEM_MAP[record.itemId]
   if (!item) return record.itemLabel || record.itemId
-  // Oil change — show if both subItems were done
   if (item.subItems?.length && record.subItems?.length === item.subItems.length) {
     return `${item.label} + Filter`
   }
@@ -21,17 +20,22 @@ export default function LogbookPage({ vehicle, records, onDeleteRecord }) {
     return db2 - da
   })
 
+  const totalCost = records.reduce((sum, r) => sum + (r.cost || 0), 0)
+
   const vehicleLabel = vehicle.nickname
     ? `${vehicle.nickname} — ${vehicle.year} ${vehicle.make} ${vehicle.model}`
     : `${vehicle.year} ${vehicle.make} ${vehicle.model}`
 
-  const handlePrint = () => window.print()
-
   return (
     <div className="logbook-page">
       <div className="logbook-toolbar no-print">
-        <span className="logbook-count">{records.length} service record{records.length !== 1 ? 's' : ''}</span>
-        <button className="print-btn" onClick={handlePrint}>Print Logbook</button>
+        <div className="logbook-toolbar-left">
+          <span className="logbook-count">{records.length} record{records.length !== 1 ? 's' : ''}</span>
+          {totalCost > 0 && (
+            <span className="logbook-total">${totalCost.toFixed(2)} total</span>
+          )}
+        </div>
+        <button className="print-btn" onClick={() => window.print()}>Print</button>
       </div>
 
       <div className="logbook-print-area">
@@ -39,8 +43,9 @@ export default function LogbookPage({ vehicle, records, onDeleteRecord }) {
           <div className="print-title">Vehicle Maintenance Log</div>
           <div className="print-vehicle">{vehicleLabel}</div>
           <div className="print-meta">
-            Current mileage: {vehicle.currentMileage?.toLocaleString()} mi &nbsp;|&nbsp;
-            Printed: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            {vehicle.currentMileage?.toLocaleString()} mi &nbsp;·&nbsp;
+            Printed {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            {totalCost > 0 && ` · $${totalCost.toFixed(2)} tracked`}
           </div>
         </div>
 
@@ -53,6 +58,7 @@ export default function LogbookPage({ vehicle, records, onDeleteRecord }) {
                 <th>Date</th>
                 <th>Mileage</th>
                 <th>Service</th>
+                <th>Cost</th>
                 <th>Notes</th>
                 {onDeleteRecord && <th className="no-print col-actions"></th>}
               </tr>
@@ -69,6 +75,9 @@ export default function LogbookPage({ vehicle, records, onDeleteRecord }) {
                   <td className="col-service">
                     {r.type === 'reset' && <span className="reset-badge">NEW</span>}
                     {serviceLabel(r)}
+                  </td>
+                  <td className="col-cost">
+                    {r.cost != null ? `$${Number(r.cost).toFixed(2)}` : '—'}
                   </td>
                   <td className="col-notes">{r.notes || '—'}</td>
                   {onDeleteRecord && (
@@ -91,9 +100,7 @@ export default function LogbookPage({ vehicle, records, onDeleteRecord }) {
           </table>
         )}
 
-        <div className="logbook-print-footer">
-          WheelsUp Vehicle Maintenance Tracker
-        </div>
+        <div className="logbook-print-footer">Klutch — Vehicle Maintenance Tracker</div>
       </div>
     </div>
   )
