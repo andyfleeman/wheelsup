@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { MAKES, getModels, getYears } from '../data/vehicles.js'
 import { saveVehicle } from '../services/db'
 import { ENGINE_TYPES, getOilSpec } from '../data/maintenanceItems'
+import { playCarFlyby } from '../utils/sounds'
 import './AddVehiclePage.css'
 
 const YEARS = getYears()
@@ -31,6 +32,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
         dailyMiles: form.dailyMiles ? Number(form.dailyMiles) : null,
         year: Number(form.year),
       })
+      if (!existing) playCarFlyby()
       onSaved()
     } finally {
       setSaving(false)

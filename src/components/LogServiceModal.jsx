@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { playBurnout } from '../utils/sounds'
 import './LogServiceModal.css'
 
 export default function LogServiceModal({ item, currentMileage, onSave, onClose, resetMode }) {
@@ -15,6 +16,7 @@ export default function LogServiceModal({ item, currentMileage, onSave, onClose,
   const handleSave = async () => {
     if (!allSubItemsChecked) return
     setSaving(true)
+    playBurnout()
     await onSave({
       itemId:    item.id,
       itemLabel: item.label,
