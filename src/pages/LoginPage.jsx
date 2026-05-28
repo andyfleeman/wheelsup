@@ -7,7 +7,7 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <div className="login-logo">🚗</div>
+        <div className="login-logo"><span className="logo-mark">W</span></div>
         <h1>WheelsUp</h1>
         <p>Track all your vehicle maintenance in one place.</p>
         <button className="google-btn" onClick={login}>

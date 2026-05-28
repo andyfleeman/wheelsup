@@ -56,7 +56,6 @@ export default function MaintenanceCard({
   return (
     <div className="maintenance-card" style={{ '--status-color': status.color }}>
       <div className="card-top" onClick={() => setExpanded(e => !e)}>
-        <div className="card-icon">{item.icon}</div>
         <div className="card-info">
           <div className="card-label">{item.label}</div>
           <div className="card-status" style={{ color: status.color }}>{status.label}</div>
@@ -98,12 +97,12 @@ export default function MaintenanceCard({
                     autoFocus
                   />
                   <span>mi</span>
-                  <button onClick={handleIntervalSave}>✓</button>
+                  <button onClick={handleIntervalSave}>Save</button>
                   <button onClick={() => setEditingInterval(false)}>✕</button>
                 </span>
               ) : (
                 <span className="interval-value" onClick={() => { setIntervalInput(intervalMiles); setEditingInterval(true) }}>
-                  {(intervalMiles || item.defaultIntervalMiles || '—').toLocaleString()} mi ✏️
+                  {(intervalMiles || item.defaultIntervalMiles || '—').toLocaleString()} mi — edit
                 </span>
               )}
             </div>
@@ -120,7 +119,7 @@ export default function MaintenanceCard({
             <div className="detail-row">
               <span>Est. due date</span>
               <span className={isTimeLimitSooner ? 'due-time-limit' : ''}>
-                {formattedDueDate}{isTimeLimitSooner ? ' ⏱' : ''}
+                {formattedDueDate}{isTimeLimitSooner ? ' (time)' : ''}
               </span>
             </div>
           )}

@@ -31,7 +31,7 @@ export default function LogbookPage({ vehicle, records }) {
     <div className="logbook-page">
       <div className="logbook-toolbar no-print">
         <span className="logbook-count">{records.length} service record{records.length !== 1 ? 's' : ''}</span>
-        <button className="print-btn" onClick={handlePrint}>🖨 Print Logbook</button>
+        <button className="print-btn" onClick={handlePrint}>Print Logbook</button>
       </div>
 
       <div className="logbook-print-area">

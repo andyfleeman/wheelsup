@@ -24,7 +24,7 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle }) {
     <div className="garage-page">
       <div className="garage-header">
         <div>
-          <h1>WheelsUp 🚗</h1>
+          <h1>WheelsUp</h1>
           <p className="garage-subtitle">My Garage</p>
         </div>
         <button className="logout-btn" onClick={logout} title="Sign out">Sign out</button>
@@ -34,8 +34,8 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle }) {
         <div className="loading">Loading vehicles...</div>
       ) : vehicles.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">🔧</div>
-          <h3>No vehicles yet</h3>
+          <div className="empty-icon">NO VEHICLES</div>
+          <h3>Your garage is empty</h3>
           <p>Add your first vehicle to start tracking maintenance.</p>
         </div>
       ) : (
@@ -43,7 +43,7 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle }) {
           {vehicles.map(v => (
             <div key={v.id} className="vehicle-card" onClick={() => onSelectVehicle(v)}>
               <div className="vehicle-card-main">
-                <div className="vehicle-icon">🚗</div>
+                <div className="vehicle-icon">{v.make?.charAt(0) || 'V'}</div>
                 <div className="vehicle-info">
                   <div className="vehicle-name">
                     {v.nickname || `${v.year} ${v.make} ${v.model}`}
@@ -60,7 +60,7 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle }) {
                 onClick={e => { e.stopPropagation(); handleDelete(v.id) }}
                 title="Remove vehicle"
               >
-                🗑️
+                Remove
               </button>
             </div>
           ))}
