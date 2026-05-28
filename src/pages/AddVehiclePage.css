@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   gap: 0.875rem;
-  padding: 0.875rem 1rem;
+  padding: calc(env(safe-area-inset-top) + 0.875rem) 1rem 0.875rem;
   background: #1c1c1e;
   border-bottom: 3px solid #c62828;
   position: sticky;

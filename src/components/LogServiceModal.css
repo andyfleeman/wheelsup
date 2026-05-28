@@ -11,7 +11,7 @@
 .modal-sheet {
   background: white;
   border-radius: 20px 20px 0 0;
-  padding: 0.75rem 1.25rem 2.5rem;
+  padding: 0.75rem 1.25rem calc(env(safe-area-inset-bottom) + 2.5rem);
   width: 100%;
   max-height: 85vh;
   overflow-y: auto;
