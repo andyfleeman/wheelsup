@@ -1,7 +1,7 @@
 .maintenance-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   overflow: hidden;
   border-left: 4px solid var(--status-color, #ddd);
 }
@@ -15,33 +15,29 @@
   user-select: none;
 }
 
-.card-icon {
-  font-size: 1.75rem;
-  min-width: 2rem;
-  text-align: center;
-}
-
 .card-info {
   flex: 1;
   min-width: 0;
 }
 
 .card-label {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
   color: #1a1a1a;
+  letter-spacing: 0.01em;
 }
 
 .card-status {
-  font-size: 0.85rem;
-  margin-top: 0.1rem;
+  font-size: 0.82rem;
+  margin-top: 0.15rem;
+  font-weight: 500;
 }
 
 .progress-bar {
-  height: 4px;
+  height: 3px;
   background: #eee;
   border-radius: 2px;
-  margin-top: 0.4rem;
+  margin-top: 0.45rem;
   overflow: hidden;
 }
 
@@ -52,8 +48,8 @@
 }
 
 .card-chevron {
-  font-size: 0.75rem;
-  color: #aaa;
+  font-size: 0.7rem;
+  color: #bbb;
 }
 
 .card-detail {
@@ -62,6 +58,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  background: #fafafa;
 }
 
 .detail-row {
@@ -74,16 +71,21 @@
 
 .detail-row span:first-child {
   color: #888;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
 }
 
 .detail-row span:last-child {
-  font-weight: 500;
+  font-weight: 600;
   color: #1a1a1a;
 }
 
 .interval-value {
   cursor: pointer;
-  color: #1a73e8 !important;
+  color: #c62828 !important;
+  font-size: 0.82rem !important;
 }
 
 .interval-edit {
@@ -95,7 +97,7 @@
 .interval-edit input {
   width: 80px;
   padding: 0.3rem 0.5rem;
-  border: 1.5px solid #1a73e8;
+  border: 1.5px solid #c62828;
   border-radius: 6px;
   font-size: 0.875rem;
   text-align: right;
@@ -104,16 +106,18 @@
 .interval-edit button {
   background: none;
   border: none;
-  font-size: 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
   cursor: pointer;
-  padding: 0.1rem 0.3rem;
+  padding: 0.2rem 0.4rem;
   border-radius: 4px;
+  color: #555;
 }
 
-.interval-edit button:hover { background: #f0f4ff; }
+.interval-edit button:hover { background: #f0f0f0; }
 
 .due-time-limit {
-  color: #f57c00 !important;
+  color: #e65100 !important;
 }
 
 .time-hint {
@@ -134,27 +138,31 @@
 .log-btn {
   width: 100%;
   padding: 0.75rem;
-  background: #1a73e8;
+  background: #c62828;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.15s;
 }
 
-.log-btn:hover { background: #1557b0; }
+.log-btn:hover { background: #b71c1c; }
 
 .reset-btn {
   width: 100%;
   padding: 0.75rem;
   background: white;
-  color: #1a73e8;
-  border: 1.5px solid #1a73e8;
+  color: #1a1a1a;
+  border: 1.5px solid #1c1c1e;
   border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.15s;
 }
 
-.reset-btn:hover { background: #f0f4ff; }
+.reset-btn:hover { background: #f0f0f0; }

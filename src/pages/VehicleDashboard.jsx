@@ -118,7 +118,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
             <span className="header-sub">{vehicle.year} {vehicle.make} {vehicle.model}</span>
           )}
         </div>
-        <button className="edit-vehicle-btn" onClick={onEdit} title="Edit vehicle">✏️</button>
+        <button className="edit-vehicle-btn" onClick={onEdit} title="Edit vehicle">Edit</button>
       </div>
 
       <div className="mileage-banner">
@@ -148,7 +148,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
         return (
           <div className="overdue-banner">
             <div className="overdue-banner-title">
-              ⚠️ {overdue.length === 1 ? '1 service due' : `${overdue.length} services due`}
+              {overdue.length === 1 ? '1 SERVICE DUE' : `${overdue.length} SERVICES DUE`}
             </div>
             <div className="overdue-banner-items">
               {overdue.map(item => {
@@ -160,7 +160,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
                     className="overdue-banner-item"
                     onClick={() => { setLogItem(item); setTab('schedule') }}
                   >
-                    <span>{item.icon} {item.label}</span>
+                    <span>{item.label}</span>
                     <span className="overdue-detail">
                       {milesOver > 0 ? `${milesOver.toLocaleString()} mi overdue` : 'time limit reached'} · Log now →
                     </span>

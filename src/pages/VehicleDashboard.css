@@ -2,47 +2,72 @@
   padding-bottom: 2rem;
 }
 
-.page-header {
+.vehicle-dashboard .page-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.875rem 1rem;
-  background: white;
-  border-bottom: 1px solid #eee;
+  background: #1c1c1e;
+  border-bottom: 3px solid #c62828;
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
-.header-title {
+.vehicle-dashboard .header-title {
   flex: 1;
 }
 
-.header-title h2 {
+.vehicle-dashboard .header-title h2 {
   margin: 0;
   font-size: 1.1rem;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-weight: 700;
+  color: white;
 }
 
-.header-sub {
+.vehicle-dashboard .header-sub {
   font-size: 0.8rem;
-  color: #888;
+  color: rgba(255,255,255,0.5);
 }
 
-.edit-vehicle-btn {
+.vehicle-dashboard .back-btn {
   background: none;
   border: none;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  color: rgba(255,255,255,0.8);
+  line-height: 1;
+}
+
+.vehicle-dashboard .back-btn:hover { color: white; }
+
+.edit-vehicle-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0.3rem 0.7rem;
+  border-radius: 5px;
+  color: rgba(255,255,255,0.8);
+  transition: background 0.15s;
+}
+
+.edit-vehicle-btn:hover {
+  background: rgba(255,255,255,0.2);
+  color: white;
 }
 
 .mileage-banner {
-  background: linear-gradient(135deg, #1a73e8, #0d47a1);
+  background: #2c2c2e;
   color: white;
   padding: 1.25rem 1rem;
   text-align: center;
+  border-bottom: 1px solid #3a3a3c;
 }
 
 .mileage-display {
@@ -53,22 +78,25 @@
 }
 
 .mileage-label {
-  font-size: 0.8rem;
-  opacity: 0.85;
+  font-size: 0.7rem;
+  opacity: 0.5;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
 }
 
 .mileage-value {
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .mileage-tap {
-  font-size: 0.75rem;
-  opacity: 0.7;
+  font-size: 0.7rem;
+  opacity: 0.4;
   margin-top: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
 
 .mileage-edit {
@@ -85,39 +113,42 @@
   font-size: 1.1rem;
   width: 140px;
   text-align: center;
+  background: #3a3a3c;
+  color: white;
 }
 
 .mileage-edit button {
   padding: 0.5rem 0.875rem;
   border-radius: 8px;
   border: none;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
   cursor: pointer;
+  letter-spacing: 0.04em;
 }
 
 .mileage-edit button:first-of-type {
-  background: white;
-  color: #1a73e8;
+  background: #c62828;
+  color: white;
 }
 
 .mileage-edit button:last-of-type {
-  background: rgba(255,255,255,0.2);
-  color: white;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
 }
 
 .overdue-banner {
   background: #fff3e0;
-  border-bottom: 2px solid #ff6f00;
+  border-bottom: 2px solid #e65100;
   padding: 0.75rem 1rem;
 }
 
 .overdue-banner-title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #e65100;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #bf360c;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
   margin-bottom: 0.5rem;
 }
 
@@ -136,7 +167,7 @@
   border-radius: 8px;
   padding: 0.625rem 0.875rem;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #bf360c;
   cursor: pointer;
   text-align: left;
@@ -153,7 +184,7 @@
 
 .dashboard-tabs {
   display: flex;
-  border-bottom: 2px solid #eee;
+  border-bottom: 2px solid #e0e0e0;
   background: white;
   position: sticky;
   top: 57px;
@@ -165,9 +196,9 @@
   padding: 0.75rem;
   background: none;
   border: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #888;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #999;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
@@ -176,16 +207,18 @@
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .dash-tab.active {
-  color: #1a73e8;
-  border-bottom-color: #1a73e8;
-  font-weight: 600;
+  color: #c62828;
+  border-bottom-color: #c62828;
+  font-weight: 700;
 }
 
 .tab-badge {
-  background: #1a73e8;
+  background: #c62828;
   color: white;
   font-size: 0.7rem;
   font-weight: 700;
@@ -204,4 +237,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
+  background: #f0f0f0;
+  min-height: calc(100vh - 200px);
 }

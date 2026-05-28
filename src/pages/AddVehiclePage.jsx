@@ -1,48 +1,24 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { fetchMakes, fetchModels } from '../services/vehicleApi'
+import { MAKES, getModels, getYears } from '../data/vehicles.js'
 import { saveVehicle } from '../services/db'
 import { ENGINE_TYPES, getOilSpec } from '../data/maintenanceItems'
 import './AddVehiclePage.css'
 
+const YEARS = getYears()
+
 export default function AddVehiclePage({ onSaved, onCancel, existing }) {
   const { user } = useAuth()
-  const [makes, setMakes] = useState([])
-  const [models, setModels] = useState([])
   const [form, setForm] = useState({
-    make: '',
-    model: '',
-    year: '',
-    engineType: '',
-    currentMileage: '',
-    dailyMiles: '',
-    nickname: '',
+    make: '', model: '', year: '', engineType: '',
+    currentMileage: '', dailyMiles: '', nickname: '',
     ...(existing || {}),
   })
   const [saving, setSaving] = useState(false)
-  const [loadingMakes, setLoadingMakes] = useState(true)
-  const [loadingModels, setLoadingModels] = useState(false)
 
-  const currentYear = new Date().getFullYear() + 1
-  const years = Array.from({ length: currentYear - 1989 }, (_, i) => currentYear - i)
-
-  useEffect(() => {
-    fetchMakes()
-      .then(setMakes)
-      .finally(() => setLoadingMakes(false))
-  }, [])
-
-  useEffect(() => {
-    if (!form.make) return
-    setLoadingModels(true)
-    fetchModels(form.make)
-      .then(setModels)
-      .finally(() => setLoadingModels(false))
-  }, [form.make])
-
-  const set = (field, value) => setForm(f => ({ ...f, [field]: value }))
-
+  const models = form.make ? getModels(form.make) : []
   const oilSpec = form.make && form.engineType ? getOilSpec(form.make, form.engineType) : null
+  const set = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
   const handleSubmit = async e => {
     e.preventDefault()
@@ -73,7 +49,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
           Nickname (optional)
           <input
             type="text"
-            placeholder="e.g. My Truck"
+            placeholder="e.g. Work Truck"
             value={form.nickname}
             onChange={e => set('nickname', e.target.value)}
           />
@@ -83,32 +59,22 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
           Year *
           <select value={form.year} onChange={e => set('year', e.target.value)} required>
             <option value="">Select year...</option>
-            {years.map(y => <option key={y} value={y}>{y}</option>)}
+            {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
         </label>
 
         <label>
           Make *
-          <select
-            value={form.make}
-            onChange={e => { set('make', e.target.value); set('model', '') }}
-            required
-            disabled={loadingMakes}
-          >
-            <option value="">{loadingMakes ? 'Loading...' : 'Select make...'}</option>
-            {makes.map(m => <option key={m} value={m}>{m}</option>)}
+          <select value={form.make} onChange={e => { set('make', e.target.value); set('model', '') }} required>
+            <option value="">Select make...</option>
+            {MAKES.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
         </label>
 
         <label>
           Model *
-          <select
-            value={form.model}
-            onChange={e => set('model', e.target.value)}
-            required
-            disabled={!form.make || loadingModels}
-          >
-            <option value="">{loadingModels ? 'Loading...' : 'Select model...'}</option>
+          <select value={form.model} onChange={e => set('model', e.target.value)} required disabled={!form.make}>
+            <option value="">{form.make ? 'Select model...' : 'Select make first'}</option>
             {models.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
         </label>
@@ -145,12 +111,12 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
           Average Daily Miles
           <input
             type="number"
-            placeholder="e.g. 62 (used to estimate service dates)"
+            placeholder="e.g. 62"
             value={form.dailyMiles}
             onChange={e => set('dailyMiles', e.target.value)}
             min="1"
           />
-          <span className="field-hint">Used to predict when your next service is due</span>
+          <span className="field-hint">Used to estimate your next service date</span>
         </label>
 
         <button type="submit" className="primary-btn" disabled={saving}>

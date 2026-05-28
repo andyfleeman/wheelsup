@@ -9,7 +9,7 @@ export default function LogServiceModal({ item, currentMileage, onSave, onClose,
 
   const title = resetMode
     ? item.resetAction?.label
-    : `Log ${item.icon} ${item.label}`
+    : `Log ${item.label}`
 
   const toggleCheck = (id) => setChecked(c => ({ ...c, [id]: !c[id] }))
 
