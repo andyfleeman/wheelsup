@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage'
 import GaragePage from './pages/GaragePage'
 import AddVehiclePage from './pages/AddVehiclePage'
 import VehicleDashboard from './pages/VehicleDashboard'
+import SettingsPage from './pages/SettingsPage'
 import './App.css'
 
 function AppRouter() {
@@ -17,6 +18,10 @@ function AppRouter() {
   }
 
   if (!user) return <LoginPage />
+
+  if (view === 'settings') {
+    return <SettingsPage onBack={() => setView('garage')} />
+  }
 
   if (view === 'add') {
     return (
@@ -48,6 +53,7 @@ function AppRouter() {
     <GaragePage
       onSelectVehicle={v => { setSelectedVehicle(v); setView('dashboard') }}
       onAddVehicle={() => { setEditingVehicle(null); setView('add') }}
+      onSettings={() => setView('settings')}
     />
   )
 }
