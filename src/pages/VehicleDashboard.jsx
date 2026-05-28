@@ -64,6 +64,23 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
       : { estimatedDate: timeDate,   reason: 'time' }
   }
 
+  const getOverdueItems = () => {
+    const today = new Date()
+    return MAINTENANCE_ITEMS.filter(item => {
+      // Mileage overdue
+      const next = getNextMileage(item)
+      if (next && currentMileage >= next) return true
+      // Time overdue
+      const last = getLastRecord(item.id)
+      if (item.defaultIntervalMonths && last?.date) {
+        const dueDate = new Date(last.date)
+        dueDate.setMonth(dueDate.getMonth() + item.defaultIntervalMonths)
+        if (today >= dueDate) return true
+      }
+      return false
+    })
+  }
+
   const handleUpdateMileage = async () => {
     const val = Number(mileageInput)
     if (!val || val < 0) return
@@ -124,6 +141,36 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
           </div>
         )}
       </div>
+
+      {(() => {
+        const overdue = getOverdueItems()
+        if (!overdue.length) return null
+        return (
+          <div className="overdue-banner">
+            <div className="overdue-banner-title">
+              ⚠️ {overdue.length === 1 ? '1 service due' : `${overdue.length} services due`}
+            </div>
+            <div className="overdue-banner-items">
+              {overdue.map(item => {
+                const next = getNextMileage(item)
+                const milesOver = next ? currentMileage - next : null
+                return (
+                  <button
+                    key={item.id}
+                    className="overdue-banner-item"
+                    onClick={() => { setLogItem(item); setTab('schedule') }}
+                  >
+                    <span>{item.icon} {item.label}</span>
+                    <span className="overdue-detail">
+                      {milesOver > 0 ? `${milesOver.toLocaleString()} mi overdue` : 'time limit reached'} · Log now →
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
 
       <div className="dashboard-tabs">
         <button

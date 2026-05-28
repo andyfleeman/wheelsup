@@ -106,6 +106,51 @@
   color: white;
 }
 
+.overdue-banner {
+  background: #fff3e0;
+  border-bottom: 2px solid #ff6f00;
+  padding: 0.75rem 1rem;
+}
+
+.overdue-banner-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e65100;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.overdue-banner-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.overdue-banner-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border: 1px solid #ffcc80;
+  border-radius: 8px;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #bf360c;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.overdue-banner-item:hover { background: #fff8f0; }
+
+.overdue-detail {
+  font-size: 0.775rem;
+  font-weight: 500;
+  color: #e65100;
+}
+
 .dashboard-tabs {
   display: flex;
   border-bottom: 2px solid #eee;
