@@ -124,6 +124,27 @@
   letter-spacing: 0.05em;
 }
 
+.col-actions {
+  width: 70px;
+  text-align: right;
+}
+
+.delete-record-btn {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #c62828;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.delete-record-btn:hover { opacity: 1; background: #fff5f5; }
+
 .logbook-print-footer {
   margin-top: 2rem;
   font-size: 0.75rem;
@@ -182,4 +203,6 @@
   }
 
   .logbook-table tr { page-break-inside: avoid; }
+
+  .no-print { display: none !important; }
 }

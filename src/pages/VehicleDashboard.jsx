@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { MAINTENANCE_ITEMS } from '../data/maintenanceItems'
-import { saveMaintenanceRecord, getMaintenanceRecords, saveInterval, getIntervals, saveVehicle } from '../services/db'
+import { saveMaintenanceRecord, getMaintenanceRecords, deleteMaintenanceRecord, saveInterval, getIntervals, saveVehicle } from '../services/db'
 import MaintenanceCard from '../components/MaintenanceCard'
 import LogServiceModal from '../components/LogServiceModal'
 import LogbookPage from './LogbookPage'
@@ -92,6 +92,12 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   const handleIntervalChange = async (itemId, miles) => {
     setIntervals(prev => ({ ...prev, [itemId]: { miles } }))
     await saveInterval(user.uid, vehicle.id, itemId, { miles })
+  }
+
+  const handleDeleteRecord = async (recordId) => {
+    await deleteMaintenanceRecord(user.uid, vehicle.id, recordId)
+    const fresh = await getMaintenanceRecords(user.uid, vehicle.id)
+    setRecords(fresh)
   }
 
   const handleLogService = async (record) => {
@@ -207,7 +213,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
       )}
 
       {tab === 'logbook' && (
-        <LogbookPage vehicle={{ ...vehicle, currentMileage }} records={records} />
+        <LogbookPage vehicle={{ ...vehicle, currentMileage }} records={records} onDeleteRecord={handleDeleteRecord} />
       )}
 
       {logItem && (
