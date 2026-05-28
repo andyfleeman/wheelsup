@@ -8,7 +8,7 @@
   align-items: center;
   gap: 0.875rem;
   background: #1c1c1e;
-  padding: 1rem;
+  padding: calc(env(safe-area-inset-top) + 1rem) 1rem 1rem;
   border-bottom: 3px solid #c62828;
 }
 
