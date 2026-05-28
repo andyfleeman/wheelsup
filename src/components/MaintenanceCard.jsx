@@ -37,7 +37,7 @@ export default function MaintenanceCard({
     ? statusInfo(item, nextMileage, currentMileage, lastRecord)
     : { label: item.defaultIntervalMonths ? `Every ${item.defaultIntervalMonths} months` : 'Time-based', color: '#1a73e8', pct: 50 }
 
-  const status = (isTimeLimitSooner && timeStatus) ? timeStatus : mileageStatus
+  const status = mileageStatus
 
   const handleIntervalSave = () => {
     const val = Number(intervalInput)
@@ -54,11 +54,14 @@ export default function MaintenanceCard({
     : null
 
   return (
-    <div className="maintenance-card" style={{ '--status-color': status.color }}>
+    <div className="maintenance-card" style={{ '--status-color': (isTimeLimitSooner && timeStatus) ? timeStatus.color : status.color }}>
       <div className="card-top" onClick={() => setExpanded(e => !e)}>
         <div className="card-info">
           <div className="card-label">{item.label}</div>
           <div className="card-status" style={{ color: status.color }}>{status.label}</div>
+          {isTimeLimitSooner && timeStatus && (
+            <div className="card-time-warning" style={{ color: timeStatus.color }}>{timeStatus.label}</div>
+          )}
           {status.pct > 0 && (
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: `${status.pct}%`, background: status.color }} />

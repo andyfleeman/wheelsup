@@ -14,7 +14,7 @@ function serviceLabel(record) {
   return item.label
 }
 
-export default function LogbookPage({ vehicle, records }) {
+export default function LogbookPage({ vehicle, records, onDeleteRecord }) {
   const sorted = [...records].sort((a, b) => {
     const da = a.date ? new Date(a.date) : 0
     const db2 = b.date ? new Date(b.date) : 0
@@ -54,6 +54,7 @@ export default function LogbookPage({ vehicle, records }) {
                 <th>Mileage</th>
                 <th>Service</th>
                 <th>Notes</th>
+                {onDeleteRecord && <th className="no-print col-actions"></th>}
               </tr>
             </thead>
             <tbody>
@@ -70,6 +71,20 @@ export default function LogbookPage({ vehicle, records }) {
                     {serviceLabel(r)}
                   </td>
                   <td className="col-notes">{r.notes || '—'}</td>
+                  {onDeleteRecord && (
+                    <td className="no-print col-actions">
+                      <button
+                        className="delete-record-btn"
+                        onClick={() => {
+                          if (confirm(`Remove this ${serviceLabel(r)} record?`)) {
+                            onDeleteRecord(r.id)
+                          }
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

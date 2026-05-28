@@ -31,6 +31,10 @@ export async function saveMaintenanceRecord(uid, vehicleId, record) {
   return ref.id
 }
 
+export async function deleteMaintenanceRecord(uid, vehicleId, recordId) {
+  await deleteDoc(doc(db, 'users', uid, 'vehicles', vehicleId, 'records', recordId))
+}
+
 export async function getMaintenanceRecords(uid, vehicleId) {
   const q = query(
     collection(db, 'users', uid, 'vehicles', vehicleId, 'records'),

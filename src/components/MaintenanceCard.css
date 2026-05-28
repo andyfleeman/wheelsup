@@ -33,6 +33,13 @@
   font-weight: 500;
 }
 
+.card-time-warning {
+  font-size: 0.75rem;
+  margin-top: 0.1rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
 .progress-bar {
   height: 3px;
   background: #eee;
