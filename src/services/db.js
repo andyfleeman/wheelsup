@@ -4,6 +4,16 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
+// --- User Profile ---
+export async function getUserProfile(uid) {
+  const snap = await getDoc(doc(db, 'users', uid))
+  return snap.exists() ? snap.data() : {}
+}
+
+export async function saveUserProfile(uid, data) {
+  await setDoc(doc(db, 'users', uid), data, { merge: true })
+}
+
 // --- Vehicles ---
 export async function saveVehicle(uid, vehicle) {
   const ref = vehicle.id

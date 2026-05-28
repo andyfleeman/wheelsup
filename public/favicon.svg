@@ -1,4 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="22" fill="#c62828"/>
-  <text x="50" y="70" font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="62" font-weight="800" fill="white" text-anchor="middle">K</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0%" stop-color="#e53935"/>
+      <stop offset="100%" stop-color="#b71c1c"/>
+    </linearGradient>
+  </defs>
+  <!-- Hex nut / bolt head shape (automotive hex nut viewed from above) -->
+  <polygon points="50,4 92,27 92,73 50,96 8,73 8,27" fill="url(#bg)"/>
+  <!-- Inner hex ring (nut socket detail) -->
+  <polygon points="50,18 78,34 78,66 50,82 22,66 22,34" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <!-- K as stroked path — vertical bar + two diagonal arms -->
+  <path d="M33 24 L33 76 M33 50 L60 24 M33 50 L63 76"
+        stroke="white" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 </svg>

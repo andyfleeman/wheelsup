@@ -8,7 +8,18 @@ export default function LoginPage() {
     <div className="login-page">
       <div className="login-content">
         <div className="login-logo">
-          <span className="logo-k">K</span>
+          <svg viewBox="0 0 80 80" width="80" height="80" xmlns="http://www.w3.org/2000/svg" className="login-logo-hex">
+            <defs>
+              <linearGradient id="hexbg" x1="0" y1="0" x2="0.6" y2="1">
+                <stop offset="0%" stopColor="#e53935"/>
+                <stop offset="100%" stopColor="#b71c1c"/>
+              </linearGradient>
+            </defs>
+            <polygon points="40,3 74,22 74,58 40,77 6,58 6,22" fill="url(#hexbg)"/>
+            <polygon points="40,14 63,27 63,53 40,66 17,53 17,27" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
+            <path d="M26 19 L26 61 M26 40 L48 19 M26 40 L51 61"
+                  stroke="white" strokeWidth="7.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          </svg>
         </div>
         <h1 className="login-wordmark">Klutch</h1>
         <p className="login-tagline">Your garage. Never miss a service.</p>

@@ -38,6 +38,51 @@ export default function LogbookPage({ vehicle, records, onDeleteRecord }) {
         <button className="print-btn" onClick={() => window.print()}>Print</button>
       </div>
 
+      {/* Screen view: stacked cards */}
+      <div className="logbook-cards no-print">
+        {sorted.length === 0 ? (
+          <div className="logbook-empty">No service records yet. Log a service to get started.</div>
+        ) : (
+          sorted.map((r, i) => {
+            const label = serviceLabel(r)
+            const dateStr = r.date
+              ? new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              : null
+            return (
+              <div key={r.id || i} className={`log-card${r.type === 'reset' ? ' log-card-reset' : ''}`}>
+                <div className="log-card-top">
+                  <div className="log-card-service">
+                    {r.type === 'reset' && <span className="reset-badge">RESET</span>}
+                    {label}
+                  </div>
+                  {dateStr && <div className="log-card-date">{dateStr}</div>}
+                </div>
+                <div className="log-card-chips">
+                  <span className="log-chip log-chip-mileage">{r.mileage?.toLocaleString()} mi</span>
+                  {r.cost != null && (
+                    <span className="log-chip log-chip-cost">${Number(r.cost).toFixed(2)}</span>
+                  )}
+                </div>
+                {r.notes && <div className="log-card-notes">{r.notes}</div>}
+                {onDeleteRecord && (
+                  <div className="log-card-footer">
+                    <button
+                      className="delete-record-btn"
+                      onClick={() => {
+                        if (confirm(`Remove this ${label} record?`)) onDeleteRecord(r.id)
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          })
+        )}
+      </div>
+
+      {/* Print view: table format */}
       <div className="logbook-print-area">
         <div className="logbook-print-header">
           <div className="print-title">Vehicle Maintenance Log</div>
@@ -49,9 +94,7 @@ export default function LogbookPage({ vehicle, records, onDeleteRecord }) {
           </div>
         </div>
 
-        {sorted.length === 0 ? (
-          <div className="logbook-empty">No service records yet. Log a service to get started.</div>
-        ) : (
+        {sorted.length > 0 && (
           <table className="logbook-table">
             <thead>
               <tr>
@@ -60,7 +103,6 @@ export default function LogbookPage({ vehicle, records, onDeleteRecord }) {
                 <th>Service</th>
                 <th>Cost</th>
                 <th>Notes</th>
-                {onDeleteRecord && <th className="no-print col-actions"></th>}
               </tr>
             </thead>
             <tbody>
@@ -73,27 +115,11 @@ export default function LogbookPage({ vehicle, records, onDeleteRecord }) {
                   </td>
                   <td className="col-mileage">{r.mileage?.toLocaleString()} mi</td>
                   <td className="col-service">
-                    {r.type === 'reset' && <span className="reset-badge">NEW</span>}
+                    {r.type === 'reset' && <span className="reset-badge">RESET</span>}
                     {serviceLabel(r)}
                   </td>
-                  <td className="col-cost">
-                    {r.cost != null ? `$${Number(r.cost).toFixed(2)}` : '—'}
-                  </td>
+                  <td className="col-cost">{r.cost != null ? `$${Number(r.cost).toFixed(2)}` : '—'}</td>
                   <td className="col-notes">{r.notes || '—'}</td>
-                  {onDeleteRecord && (
-                    <td className="no-print col-actions">
-                      <button
-                        className="delete-record-btn"
-                        onClick={() => {
-                          if (confirm(`Remove this ${serviceLabel(r)} record?`)) {
-                            onDeleteRecord(r.id)
-                          }
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  )}
                 </tr>
               ))}
             </tbody>
