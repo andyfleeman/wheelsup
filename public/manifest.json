@@ -1,0 +1,18 @@
+{
+  "name": "Klutch",
+  "short_name": "Klutch",
+  "description": "Your garage. Never miss a service.",
+  "start_url": "/wheelsup/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#c62828",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/wheelsup/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

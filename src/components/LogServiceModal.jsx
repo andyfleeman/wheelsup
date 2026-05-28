@@ -4,15 +4,12 @@ import './LogServiceModal.css'
 export default function LogServiceModal({ item, currentMileage, onSave, onClose, resetMode }) {
   const [mileage, setMileage] = useState(currentMileage)
   const [notes, setNotes]     = useState('')
+  const [cost, setCost]       = useState('')
   const [checked, setChecked] = useState({})
   const [saving, setSaving]   = useState(false)
 
-  const title = resetMode
-    ? item.resetAction?.label
-    : `Log ${item.label}`
-
+  const title = resetMode ? item.resetAction?.label : `Log ${item.label}`
   const toggleCheck = (id) => setChecked(c => ({ ...c, [id]: !c[id] }))
-
   const allSubItemsChecked = !item.subItems || item.subItems.every(s => checked[s.id])
 
   const handleSave = async () => {
@@ -26,6 +23,7 @@ export default function LogServiceModal({ item, currentMileage, onSave, onClose,
       mileage:   Number(mileage),
       date:      new Date().toISOString(),
       notes,
+      cost:      cost ? parseFloat(parseFloat(cost).toFixed(2)) : null,
       subItems:  item.subItems ? item.subItems.filter(s => checked[s.id]).map(s => s.id) : [],
     })
     setSaving(false)
@@ -35,16 +33,16 @@ export default function LogServiceModal({ item, currentMileage, onSave, onClose,
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-sheet" onClick={e => e.stopPropagation()}>
         <div className="modal-handle" />
-        <h3>{title}</h3>
 
-        {resetMode && (
-          <div className="reset-notice">
-            This resets the interval clock from this mileage and date forward.
-          </div>
-        )}
+        <div className="modal-header">
+          <h3>{title}</h3>
+          {resetMode && (
+            <p className="reset-notice">Resets the interval clock from this mileage forward.</p>
+          )}
+        </div>
 
-        <label>
-          Mileage at service
+        <label className="modal-label">
+          <span>Mileage at service</span>
           <input
             type="number"
             value={mileage}
@@ -55,7 +53,7 @@ export default function LogServiceModal({ item, currentMileage, onSave, onClose,
 
         {item.subItems && (
           <div className="sub-items">
-            <div className="sub-items-label">Confirm completed:</div>
+            <div className="sub-items-label">Confirm completed</div>
             {item.subItems.map(s => (
               <label key={s.id} className="checkbox-row">
                 <input
@@ -67,19 +65,35 @@ export default function LogServiceModal({ item, currentMileage, onSave, onClose,
               </label>
             ))}
             {!allSubItemsChecked && (
-              <div className="sub-items-warning">Both must be checked to log this service</div>
+              <div className="sub-items-warning">Both must be checked to save</div>
             )}
           </div>
         )}
 
-        <label>
-          Notes (optional)
+        <label className="modal-label">
+          <span>Notes (optional)</span>
           <textarea
-            placeholder={item.id === 'oil_change' ? 'e.g. Mobil 1 5W-30, Fram filter...' : 'e.g. shop name, brand used...'}
+            placeholder={item.id === 'oil_change' ? 'e.g. Mobil 1 5W-30, Jiffy Lube...' : 'e.g. shop name, brand used...'}
             value={notes}
             onChange={e => setNotes(e.target.value)}
-            rows={3}
+            rows={2}
           />
+        </label>
+
+        <label className="modal-label">
+          <span>Cost (optional)</span>
+          <div className="cost-wrap">
+            <span className="cost-dollar">$</span>
+            <input
+              type="number"
+              placeholder="0.00"
+              value={cost}
+              onChange={e => setCost(e.target.value)}
+              min="0"
+              step="0.01"
+              className="cost-input"
+            />
+          </div>
         </label>
 
         <div className="modal-actions">
