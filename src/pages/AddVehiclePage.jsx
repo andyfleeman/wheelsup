@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { MAKES, getModels, getYears } from '../data/vehicles.js'
 import { saveVehicle } from '../services/db'
 import { ENGINE_TYPES } from '../data/maintenanceItems'
-import { lookupOilSpec, filterSearchUrl } from '../data/vehicleSpecs'
+import { lookupOilSpec, filterSearchUrl, getEngineOptions } from '../data/vehicleSpecs'
 import { playCarFlyby } from '../utils/sounds'
 import './AddVehiclePage.css'
 
@@ -22,13 +22,16 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
   const [filterAutoFilled, setFilterAutoFilled] = useState(false)
 
   const models = form.make ? getModels(form.make) : []
+  const engineOptions = (form.make && form.model && form.year)
+    ? getEngineOptions(form.make, form.model, form.year)
+    : []
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
-  // Auto-populate oil weight + filter from local OEM database when vehicle identity changes
+  // Auto-populate oil weight + filter when vehicle identity or engine changes
   useEffect(() => {
     if (existing) return
     if (!form.make || !form.model || !form.year) return
-    const spec = lookupOilSpec(form.make, form.model, form.year)
+    const spec = lookupOilSpec(form.make, form.model, form.year, form.engineType || null)
 
     // Known EV — clear any previously set values and bail
     if (spec !== null && spec.oil === null) {
@@ -58,7 +61,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
     }
 
     if (Object.keys(updates).length) setForm(f => ({ ...f, ...updates }))
-  }, [form.make, form.model, form.year])
+  }, [form.make, form.model, form.year, form.engineType])
 
   const handleSubmit = async e => {
     e.preventDefault()
@@ -79,7 +82,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
   }
 
   const dbSpec = (form.make && form.model && form.year)
-    ? lookupOilSpec(form.make, form.model, form.year)
+    ? lookupOilSpec(form.make, form.model, form.year, form.engineType || null)
     : null
 
   const isKnownEV = dbSpec !== null && dbSpec.oil === null
@@ -116,7 +119,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
 
         <label>
           Make *
-          <select value={form.make} onChange={e => { set('make', e.target.value); set('model', '') }} required>
+          <select value={form.make} onChange={e => { set('make', e.target.value); set('model', ''); set('engineType', '') }} required>
             <option value="">Select make...</option>
             {MAKES.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
@@ -124,19 +127,21 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
 
         <label>
           Model *
-          <select value={form.model} onChange={e => set('model', e.target.value)} required disabled={!form.make}>
+          <select value={form.model} onChange={e => { set('model', e.target.value); set('engineType', '') }} required disabled={!form.make}>
             <option value="">{form.make ? 'Select model...' : 'Select make first'}</option>
             {models.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
         </label>
 
-        <label>
-          Engine Type
-          <select value={form.engineType} onChange={e => set('engineType', e.target.value)}>
-            <option value="">Select engine type...</option>
-            {ENGINE_TYPES.map(e => <option key={e} value={e}>{e}</option>)}
-          </select>
-        </label>
+        {engineOptions.length > 0 && (
+          <label>
+            Engine
+            <select value={form.engineType} onChange={e => set('engineType', e.target.value)}>
+              <option value="">Select engine...</option>
+              {engineOptions.map(e => <option key={e} value={e}>{e}</option>)}
+            </select>
+          </label>
+        )}
 
         <label>
           Current Mileage *
