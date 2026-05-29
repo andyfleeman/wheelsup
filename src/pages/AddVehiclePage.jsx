@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useUserPrefs } from '../contexts/UserPrefsContext'
 import { MAKES, getModels, getYears } from '../data/vehicles.js'
 import { saveVehicle } from '../services/db'
 import { ENGINE_TYPES } from '../data/maintenanceItems'
@@ -9,8 +10,15 @@ import './AddVehiclePage.css'
 
 const YEARS = getYears()
 
+function fmtVolume(qt, useMetric) {
+  if (!qt) return null
+  if (useMetric) return `${(qt * 0.946352).toFixed(1)} L`
+  return `${qt} qt`
+}
+
 export default function AddVehiclePage({ onSaved, onCancel, existing }) {
   const { user } = useAuth()
+  const { prefs } = useUserPrefs()
   const [form, setForm] = useState({
     make: '', model: '', year: '', engineType: '',
     currentMileage: '', dailyMiles: '', nickname: '',
@@ -193,7 +201,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
               </div>
               {dbSpec?.qt ? (
                 <span className="field-hint">
-                  {oilAutoFilled ? 'Looked up from OEM specs · ' : ''}Capacity: ~{dbSpec.qt} qt — verify with owner's manual
+                  {oilAutoFilled ? 'Looked up from OEM specs · ' : ''}Capacity: ~{fmtVolume(dbSpec.qt, prefs.useMetric)} — verify with owner's manual
                 </span>
               ) : (
                 <span className="field-hint">Check your oil cap or owner's manual</span>

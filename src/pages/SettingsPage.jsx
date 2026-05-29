@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useUserPrefs } from '../contexts/UserPrefsContext'
 import { getUserProfile, saveUserProfile } from '../services/db'
 import './SettingsPage.css'
 
 export default function SettingsPage({ onBack }) {
   const { user, logout } = useAuth()
+  const { prefs, updatePref } = useUserPrefs()
   const [displayName, setDisplayName]         = useState('')
   const [defaultOilInterval, setDefaultOilInterval] = useState('')
   const [alertDays, setAlertDays]             = useState('')
@@ -103,6 +105,42 @@ export default function SettingsPage({ onBack }) {
                 </div>
               </label>
               <div className="settings-hint">How far ahead to surface upcoming service warnings.</div>
+            </div>
+          </div>
+
+          <div className="settings-section">
+            <div className="settings-section-title">App</div>
+            <div className="settings-group">
+              <div className="settings-row settings-row-toggle">
+                <div>
+                  <span className="settings-row-label">Sound Effects</span>
+                  <div className="settings-hint settings-hint-inline">Play audio cues when adding vehicles and logging service</div>
+                </div>
+                <button
+                  className={`settings-toggle${prefs.soundsEnabled ? ' settings-toggle--on' : ''}`}
+                  onClick={() => updatePref('soundsEnabled', !prefs.soundsEnabled)}
+                  aria-pressed={prefs.soundsEnabled}
+                >
+                  <span className="settings-toggle-knob" />
+                </button>
+              </div>
+
+              <div className="settings-row settings-row-toggle">
+                <div>
+                  <span className="settings-row-label">Units</span>
+                  <div className="settings-hint settings-hint-inline">Oil capacity display — quarts or liters</div>
+                </div>
+                <div className="settings-unit-toggle">
+                  <button
+                    className={`settings-unit-btn${!prefs.useMetric ? ' settings-unit-btn--active' : ''}`}
+                    onClick={() => updatePref('useMetric', false)}
+                  >Imperial</button>
+                  <button
+                    className={`settings-unit-btn${prefs.useMetric ? ' settings-unit-btn--active' : ''}`}
+                    onClick={() => updatePref('useMetric', true)}
+                  >Metric</button>
+                </div>
+              </div>
             </div>
           </div>
 

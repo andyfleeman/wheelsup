@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { UserPrefsProvider } from './contexts/UserPrefsContext'
 import LoginPage from './pages/LoginPage'
 import GaragePage from './pages/GaragePage'
 import AddVehiclePage from './pages/AddVehiclePage'
@@ -61,7 +62,9 @@ function AppRouter() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppRouter />
+      <UserPrefsProvider>
+        <AppRouter />
+      </UserPrefsProvider>
     </AuthProvider>
   )
 }

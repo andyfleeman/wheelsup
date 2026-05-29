@@ -1,5 +1,13 @@
 // Web Audio API sound synthesis — no audio files required
 
+function isSoundsEnabled() {
+  try {
+    const stored = localStorage.getItem('klutch_prefs')
+    if (!stored) return true
+    return JSON.parse(stored).soundsEnabled !== false
+  } catch { return true }
+}
+
 function getCtx() {
   if (!window._klutchAudioCtx) {
     window._klutchAudioCtx = new (window.AudioContext || window.webkitAudioContext)()
@@ -9,6 +17,7 @@ function getCtx() {
 
 // Race car flyby: engine roar that sweeps in pitch then fades
 export function playCarFlyby() {
+  if (!isSoundsEnabled()) return
   try {
     const ctx = getCtx()
     const now = ctx.currentTime
@@ -80,6 +89,7 @@ export function playCarFlyby() {
 
 // Tire burnout: white noise burst + rubber squeal
 export function playBurnout() {
+  if (!isSoundsEnabled()) return
   try {
     const ctx = getCtx()
     const now = ctx.currentTime
