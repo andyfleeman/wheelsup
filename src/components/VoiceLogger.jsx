@@ -83,6 +83,7 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
   const [errorMsg, setErrorMsg] = useState('')
   const [parsed,   setParsed]   = useState(null)   // { services, mileage }
   const recognitionRef = useRef(null)
+  const listenTimerRef = useRef(null)
 
   // Reset to idle whenever the panel is hidden
   useEffect(() => {
@@ -95,6 +96,7 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
   }, [active])
 
   function stopRecognition() {
+    clearTimeout(listenTimerRef.current)
     if (recognitionRef.current) {
       try { recognitionRef.current.stop() } catch (_) {}
       recognitionRef.current = null
@@ -125,29 +127,42 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
     recognition.maxAlternatives = 1
     recognitionRef.current = recognition
 
-    recognition.onstart = () => setUiState(STATE.LISTENING)
+    recognition.onstart = () => {
+      setUiState(STATE.LISTENING)
+      // Fallback: if nothing is heard in 10s, stop and show error
+      listenTimerRef.current = setTimeout(() => {
+        stopRecognition()
+        setErrorMsg("We didn't hear anything. Try again.")
+        setUiState(STATE.ERROR)
+      }, 10000)
+    }
 
     recognition.onresult = (event) => {
+      clearTimeout(listenTimerRef.current)
       const transcript = event.results[0][0].transcript
       handleTranscript(transcript)
     }
 
     recognition.onerror = (event) => {
-      // 'no-speech' is a common benign error; treat others as real errors
-      if (event.error === 'no-speech') {
+      clearTimeout(listenTimerRef.current)
+      if (event.error === 'no-speech' || event.error === 'audio-capture') {
         setErrorMsg("We didn't hear anything. Try again.")
       } else {
-        setErrorMsg("Couldn't capture audio. Try again.")
+        setErrorMsg(`Couldn't capture audio (${event.error}). Try again.`)
       }
       setUiState(STATE.ERROR)
     }
 
     recognition.onend = () => {
-      // If we're still in LISTENING state here, no result came through
-      setUiState(prev => prev === STATE.LISTENING ? STATE.ERROR : prev)
-      if (uiState === STATE.LISTENING) {
-        setErrorMsg("We didn't hear anything. Try again.")
-      }
+      clearTimeout(listenTimerRef.current)
+      // Fix stale closure: use functional updater so we read current state
+      setUiState(prev => {
+        if (prev === STATE.LISTENING) {
+          setErrorMsg("We didn't hear anything. Try again.")
+          return STATE.ERROR
+        }
+        return prev
+      })
     }
 
     recognition.start()
