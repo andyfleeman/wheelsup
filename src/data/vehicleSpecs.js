@@ -296,7 +296,7 @@ const DB = {
     Sienna:     [[2021, 9999, '0W-16', 4.6], [2011, 2020, '0W-20', 6.4]],
     Supra:      [[2020, 9999, '0W-30', 5.3]],
     Tacoma:     [[2016, 9999, '0W-20', 6.1], [2012, 2015, '5W-30', 5.5]],
-    Tundra:     [[2022, 9999, '0W-35', 7.3], [2007, 2021, '5W-30', 7.4]],
+    Tundra:     [[2022, 9999, '0W-35', 7.3], [2007, 2021, '0W-20', 8.5]],
     Venza:      [[2021, 9999, '0W-16', 4.4]],
   },
   Volkswagen: {
@@ -330,11 +330,11 @@ const FILTER_DB = {
   'Toyota Highlander':       { wix: '57047',   fram: 'CH9972'   },
   'Toyota Prius':            { wix: '51348',   fram: 'PH4967'   },
   'Toyota RAV4':             { wix: '57047',   fram: 'CH25723'  },
-  'Toyota Sequoia':          { wix: '57310',   fram: 'CH10295'  },
+  'Toyota Sequoia':          { wix: 'WL7528',  fram: 'CH10295'  },
   'Toyota Sienna':           { wix: '57047',   fram: 'CH9972'   },
   'Toyota Supra':            { wix: 'WL10358'                   },
   'Toyota Tacoma':           { wix: '59924TR', fram: 'CH9972'   },
-  'Toyota Tundra':           { wix: '57310',   fram: 'CH10295'  },
+  'Toyota Tundra':           { wix: 'WL7528',  fram: 'CH10295'  },
   'Toyota Venza':            { wix: '51348',   fram: 'PH4967'   },
   'Honda Accord':            { wix: '57356',   fram: 'PH7317'   },
   'Honda Civic':             { wix: '57356',   fram: 'PH7317'   },
@@ -532,8 +532,33 @@ const FILTER_DB = {
   'Lincoln Navigator':       { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
 }
 
-// Match a vehicle to its oil + filter spec
-export function lookupOilSpec(make, model, year) {
+// Match a vehicle to its oil + filter spec.
+// Pass engine (e.g. "5.3L V8") to get engine-specific data — ENGINE_SPEC_DB
+// is checked first, then the model-level DB + FILTER_DB fallback.
+export function lookupOilSpec(make, model, year, engine = null) {
+  const yr = Number(year)
+
+  // ── Engine-specific lookup ───────────────────────────────────────────────
+  if (engine) {
+    const rows = ENGINE_SPEC_DB[`${make}|${model}|${engine}`]
+    if (rows) {
+      const match = rows
+        .filter(r => yr >= r[0] && yr <= r[1])
+        .sort((a, b) => b[0] - a[0])[0]
+      if (match) {
+        return {
+          oil:        match[2],
+          qt:         match[3],
+          wix:        match[4] ?? null,
+          fram:       match[5] ?? null,
+          motorcraft: match[6] ?? null,
+          oem:        null,
+        }
+      }
+    }
+  }
+
+  // ── Model-level fallback ─────────────────────────────────────────────────
   const makeData = DB[make]
   if (!makeData) return null
 
@@ -551,7 +576,6 @@ export function lookupOilSpec(make, model, year) {
 
   if (!rows) return null
 
-  const yr = Number(year)
   const match = rows
     .filter(r => yr >= r[0] && yr <= r[1])
     .sort((a, b) => b[0] - a[0])[0]
@@ -573,4 +597,398 @@ export function lookupOilSpec(make, model, year) {
 export function filterSearchUrl(year, make, model, engineType) {
   const parts = [year, make, model, engineType, 'oil filter cross reference'].filter(Boolean)
   return `https://www.google.com/search?q=${encodeURIComponent(parts.join(' '))}`
+}
+
+// ── Engine options per vehicle ───────────────────────────────────────────────
+// Key: 'Make|Model'  →  [[yearFrom, yearTo, [engine, ...]], ...]
+// Exported so AddVehiclePage can populate a vehicle-specific engine dropdown.
+export const ENGINES_DB = {
+  'Chevrolet|Silverado 1500': [
+    [2019, 9999, ['2.7L I4 Turbo', '4.3L V6', '5.3L V8', '6.2L V8']],
+    [2014, 2018, ['4.3L V6', '5.3L V8', '6.2L V8']],
+    [2007, 2013, ['4.3L V6', '4.8L V8', '5.3L V8', '6.0L V8', '6.2L V8']],
+    [1999, 2006, ['4.3L V6', '4.8L V8', '5.3L V8', '6.0L V8']],
+  ],
+  'Chevrolet|Silverado 2500HD': [
+    [2020, 9999, ['6.6L V8', '6.6L V8 Duramax Diesel']],
+    [2011, 2019, ['6.0L V8', '6.6L V8 Duramax Diesel']],
+  ],
+  'Chevrolet|Silverado 3500HD': [
+    [2020, 9999, ['6.6L V8', '6.6L V8 Duramax Diesel']],
+    [2011, 2019, ['6.0L V8', '6.6L V8 Duramax Diesel']],
+  ],
+  'Chevrolet|Tahoe': [
+    [2021, 9999, ['5.3L V8', '6.2L V8']],
+    [2015, 2020, ['5.3L V8', '6.2L V8']],
+    [2007, 2014, ['4.8L V8', '5.3L V8', '6.0L V8']],
+  ],
+  'Chevrolet|Suburban': [
+    [2021, 9999, ['5.3L V8', '6.2L V8']],
+    [2015, 2020, ['5.3L V8', '6.2L V8']],
+  ],
+  'Chevrolet|Colorado': [
+    [2023, 9999, ['2.7L I4 Turbo', '2.7L I4 Turbo Plus']],
+    [2015, 2022, ['2.5L I4', '3.6L V6', '2.8L Duramax Diesel']],
+  ],
+  'Chevrolet|Camaro': [
+    [2016, 9999, ['2.0L I4 Turbo', '3.6L V6', '6.2L V8 LT1', '6.2L V8 ZL1']],
+    [2010, 2015, ['3.6L V6', '6.2L V8']],
+  ],
+  'Chevrolet|Corvette': [
+    [2020, 9999, ['6.2L V8 LT2']],
+    [2014, 2019, ['6.2L V8 LT1', '6.2L V8 LT4']],
+  ],
+  'GMC|Sierra 1500': [
+    [2019, 9999, ['2.7L I4 Turbo', '4.3L V6', '5.3L V8', '6.2L V8']],
+    [2014, 2018, ['4.3L V6', '5.3L V8', '6.2L V8']],
+    [2007, 2013, ['4.3L V6', '4.8L V8', '5.3L V8', '6.0L V8', '6.2L V8']],
+    [1999, 2006, ['4.3L V6', '4.8L V8', '5.3L V8', '6.0L V8']],
+  ],
+  'GMC|Sierra 2500HD': [
+    [2020, 9999, ['6.6L V8', '6.6L V8 Duramax Diesel']],
+    [2011, 2019, ['6.0L V8', '6.6L V8 Duramax Diesel']],
+  ],
+  'GMC|Canyon': [
+    [2023, 9999, ['2.7L I4 Turbo', '2.7L I4 Turbo AT4X']],
+    [2015, 2022, ['2.5L I4', '3.6L V6', '2.8L Duramax Diesel']],
+  ],
+  'GMC|Yukon': [
+    [2021, 9999, ['5.3L V8', '6.2L V8']],
+    [2015, 2020, ['5.3L V8', '6.2L V8']],
+  ],
+  'GMC|Yukon XL': [
+    [2021, 9999, ['5.3L V8', '6.2L V8']],
+    [2015, 2020, ['5.3L V8', '6.2L V8']],
+  ],
+  'Cadillac|Escalade': [
+    [2021, 9999, ['6.2L V8', '3.0L Diesel']],
+    [2015, 2020, ['6.2L V8']],
+  ],
+  'Cadillac|Escalade ESV': [
+    [2021, 9999, ['6.2L V8', '3.0L Diesel']],
+    [2015, 2020, ['6.2L V8']],
+  ],
+  'Ford|F-150': [
+    [2021, 9999, ['2.7L V6 EcoBoost', '3.3L V6', '3.5L V6 EcoBoost', '3.5L V6 PowerBoost HEV', '5.0L V8']],
+    [2015, 2020, ['2.7L V6 EcoBoost', '3.5L V6', '3.5L V6 EcoBoost', '5.0L V8']],
+    [2011, 2014, ['3.7L V6', '3.5L V6 EcoBoost', '5.0L V8', '6.2L V8']],
+  ],
+  'Ford|F-250 Super Duty': [
+    [2020, 9999, ['6.2L V8', '7.3L V8', '6.7L V8 Power Stroke Diesel']],
+    [2011, 2019, ['6.2L V8', '6.7L V8 Power Stroke Diesel']],
+  ],
+  'Ford|Mustang': [
+    [2018, 9999, ['2.3L I4 EcoBoost', '5.0L V8 GT', '5.2L V8 GT500']],
+    [2015, 2017, ['2.3L I4 EcoBoost', '5.0L V8 GT', '5.2L V8 GT350']],
+  ],
+  'Ford|Explorer': [
+    [2020, 9999, ['2.3L I4 EcoBoost', '3.0L V6 EcoBoost']],
+    [2016, 2019, ['2.3L I4 EcoBoost', '3.5L V6', '3.5L V6 EcoBoost']],
+    [2011, 2015, ['2.0L I4 EcoBoost', '3.5L V6']],
+  ],
+  'Ford|Expedition': [
+    [2018, 9999, ['3.5L V6 EcoBoost', '3.5L V6 EcoBoost High Output']],
+  ],
+  'Ford|Ranger': [
+    [2019, 9999, ['2.3L I4 EcoBoost']],
+  ],
+  'Ford|Bronco': [
+    [2021, 9999, ['2.3L I4 EcoBoost', '2.7L V6 EcoBoost']],
+  ],
+  'Ram|1500': [
+    [2019, 9999, ['3.6L V6 Pentastar', '5.7L V8 HEMI', '3.0L V6 EcoDiesel']],
+    [2013, 2018, ['3.6L V6 Pentastar', '5.7L V8 HEMI', '3.0L V6 EcoDiesel']],
+    [2009, 2012, ['3.7L V6', '4.7L V8', '5.7L V8 HEMI']],
+  ],
+  'Ram|2500': [
+    [2014, 9999, ['5.7L V8 HEMI', '6.4L V8 HEMI', '6.7L Cummins Diesel']],
+  ],
+  'Ram|3500': [
+    [2014, 9999, ['5.7L V8 HEMI', '6.4L V8 HEMI', '6.7L Cummins Diesel']],
+  ],
+  'Dodge|Challenger': [
+    [2015, 9999, ['3.6L V6 Pentastar', '5.7L V8 HEMI', '6.4L V8 HEMI', '6.2L V8 Hellcat']],
+    [2011, 2014, ['3.6L V6 Pentastar', '5.7L V8 HEMI', '6.4L V8 HEMI']],
+  ],
+  'Dodge|Charger': [
+    [2015, 9999, ['3.6L V6 Pentastar', '5.7L V8 HEMI', '6.4L V8 HEMI', '6.2L V8 Hellcat']],
+    [2011, 2014, ['3.6L V6 Pentastar', '5.7L V8 HEMI', '6.4L V8 HEMI']],
+  ],
+  'Dodge|Durango': [
+    [2018, 9999, ['3.6L V6 Pentastar', '5.7L V8 HEMI', '6.4L V8 HEMI']],
+    [2011, 2017, ['3.6L V6 Pentastar', '5.7L V8 HEMI']],
+  ],
+  'Jeep|Wrangler': [
+    [2018, 9999, ['2.0L I4 Turbo', '3.6L V6 Pentastar', '3.0L V6 EcoDiesel']],
+    [2012, 2017, ['3.6L V6 Pentastar']],
+  ],
+  'Jeep|Wrangler Unlimited': [
+    [2018, 9999, ['2.0L I4 Turbo', '3.6L V6 Pentastar', '3.0L V6 EcoDiesel']],
+    [2012, 2017, ['3.6L V6 Pentastar']],
+  ],
+  'Jeep|Gladiator': [
+    [2020, 9999, ['3.6L V6 Pentastar', '3.0L V6 EcoDiesel']],
+  ],
+  'Jeep|Grand Cherokee': [
+    [2021, 9999, ['2.0L I4 Turbo', '3.6L V6 Pentastar', '5.7L V8 HEMI', '6.4L V8 HEMI']],
+    [2011, 2020, ['3.6L V6 Pentastar', '5.7L V8 HEMI', '6.4L V8 HEMI']],
+  ],
+  'Jeep|Grand Cherokee L': [
+    [2021, 9999, ['3.6L V6 Pentastar', '5.7L V8 HEMI', '6.4L V8 HEMI']],
+  ],
+  'Jeep|Cherokee': [
+    [2019, 9999, ['2.0L I4 Turbo', '3.2L V6 Pentastar']],
+    [2014, 2018, ['2.4L I4 Tigershark', '3.2L V6 Pentastar']],
+  ],
+  'Toyota|Tacoma': [
+    [2016, 9999, ['2.7L I4', '3.5L V6']],
+    [2005, 2015, ['2.7L I4', '4.0L V6']],
+  ],
+  'Toyota|Tundra': [
+    [2022, 9999, ['3.5L V6 Turbo', '3.5L V6 Turbo i-FORCE MAX HEV']],
+    [2010, 2021, ['4.6L V8', '5.7L V8']],
+    [2007, 2009, ['4.7L V8', '5.7L V8']],
+  ],
+  'Toyota|4Runner': [
+    [2010, 9999, ['4.0L V6']],
+  ],
+  'Toyota|Sequoia': [
+    [2022, 9999, ['3.5L V6 Turbo i-FORCE MAX HEV']],
+    [2008, 2021, ['4.6L V8', '5.7L V8']],
+  ],
+  'Toyota|Highlander': [
+    [2020, 9999, ['2.5L I4 Hybrid', '3.5L V6']],
+    [2014, 2019, ['2.7L I4', '3.5L V6']],
+  ],
+  'Honda|Accord': [
+    [2018, 9999, ['1.5L I4 Turbo', '2.0L I4 Turbo']],
+    [2013, 2017, ['2.4L I4', '3.5L V6']],
+  ],
+  'Honda|Pilot': [
+    [2023, 9999, ['3.5L V6']],
+    [2016, 2022, ['3.5L V6']],
+  ],
+  'Nissan|Frontier': [
+    [2022, 9999, ['3.8L V6']],
+    [2005, 2021, ['2.5L I4', '4.0L V6']],
+  ],
+  'Nissan|Altima': [
+    [2019, 9999, ['2.0L VC-Turbo', '2.5L I4']],
+    [2013, 2018, ['2.5L I4', '3.5L V6']],
+  ],
+  'Nissan|Titan': [
+    [2016, 9999, ['5.6L V8', '5.0L V8 Cummins Diesel']],
+  ],
+  'Subaru|WRX': [
+    [2022, 9999, ['2.4L H4 Turbo']],
+    [2015, 2021, ['2.0L H4 Turbo FA20DIT']],
+  ],
+  'Subaru|BRZ': [
+    [2022, 9999, ['2.4L H4 FA24']],
+    [2017, 2021, ['2.0L H4 FA20']],
+  ],
+  'BMW|3 Series': [
+    [2019, 9999, ['2.0L I4 B48 (330i)', '3.0L I6 B58 (M340i)']],
+    [2012, 2018, ['2.0L I4 B46 (320i)', '2.0L I4 N20 (328i)', '3.0L I6 N55 (335i)']],
+  ],
+  'BMW|5 Series': [
+    [2017, 9999, ['2.0L I4 B48 (530i)', '3.0L I6 B58 (540i)']],
+  ],
+  'BMW|X5': [
+    [2019, 9999, ['3.0L I6 B58 (xDrive40i)', '4.4L V8 N63 (xDrive50i)']],
+  ],
+}
+
+// ── Engine-specific oil + filter specs ──────────────────────────────────────
+// Key: 'Make|Model|Engine'
+// Value: [[yearFrom, yearTo, oil, qt, wix, fram, motorcraft]]
+// Takes precedence over the model-level DB + FILTER_DB when engine is known.
+const ENGINE_SPEC_DB = {
+  // ── Chevy / GMC full-size trucks ─────────────────────────────────────────
+  // Pre-2014 (GMT800/GMT900): all gas engines share the same spin-on filter
+  // AC Delco PF46 = Wix 51042 = Fram PH3506
+  'Chevrolet|Silverado 1500|4.3L V6':         [[2019, 9999, '5W-30', 6.0, 'WL10255', 'PH12060', null], [2014, 2018, '5W-30', 6.0, 'WL10255', 'PH12060', null], [2007, 2013, '5W-30', 4.5, '51042', 'PH3506', null], [1999, 2006, '5W-30', 4.5, '51042', 'PH3506', null]],
+  'Chevrolet|Silverado 1500|4.8L V8':         [[2007, 2013, '5W-30', 6.0, '51042', 'PH3506', null], [1999, 2006, '5W-30', 6.0, '51042', 'PH3506', null]],
+  'Chevrolet|Silverado 1500|5.3L V8':         [[2019, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null], [2014, 2018, '0W-20', 8.0, 'WL10255', 'PH12060', null], [2007, 2013, '5W-30', 6.0, '51042', 'PH3506', null], [1999, 2006, '5W-30', 6.0, '51042', 'PH3506', null]],
+  'Chevrolet|Silverado 1500|6.0L V8':         [[2007, 2013, '5W-30', 6.0, '51042', 'PH3506', null]],
+  'Chevrolet|Silverado 1500|2.7L I4 Turbo':   [[2019, 9999, '5W-30', 6.0, 'WL10351', 'PH12447', null]],
+  'Chevrolet|Silverado 1500|6.2L V8':         [[2014, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null]],
+
+  'GMC|Sierra 1500|4.3L V6':                 [[2007, 2013, '5W-30', 4.5, '51042', 'PH3506', null], [1999, 2006, '5W-30', 4.5, '51042', 'PH3506', null], [2014, 9999, '5W-30', 6.0, 'WL10255', 'PH12060', null]],
+  'GMC|Sierra 1500|4.8L V8':                 [[2007, 2013, '5W-30', 6.0, '51042', 'PH3506', null], [1999, 2006, '5W-30', 6.0, '51042', 'PH3506', null]],
+  'GMC|Sierra 1500|5.3L V8':                 [[2019, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null], [2014, 2018, '0W-20', 8.0, 'WL10255', 'PH12060', null], [2007, 2013, '5W-30', 6.0, '51042', 'PH3506', null], [1999, 2006, '5W-30', 6.0, '51042', 'PH3506', null]],
+  'GMC|Sierra 1500|6.0L V8':                 [[2007, 2013, '5W-30', 6.0, '51042', 'PH3506', null]],
+  'GMC|Sierra 1500|2.7L I4 Turbo':           [[2019, 9999, '0W-20', 6.0, 'WL10255', 'PH12060', null]],
+  'GMC|Sierra 1500|6.2L V8':                 [[2014, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null]],
+
+  // ── Chevy/GMC SUVs ───────────────────────────────────────────────────────
+  'Chevrolet|Tahoe|4.8L V8':                 [[2007, 2014, '5W-30', 6.0, '51042', 'PH3506', null]],
+  'Chevrolet|Tahoe|5.3L V8':                 [[2021, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null], [2015, 2020, '5W-30', 8.0, 'WL10255', 'PH12060', null], [2007, 2014, '5W-30', 6.0, '51042', 'PH3506', null]],
+  'Chevrolet|Tahoe|6.0L V8':                 [[2007, 2014, '5W-30', 6.0, '51042', 'PH3506', null]],
+  'Chevrolet|Tahoe|6.2L V8':                 [[2015, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null]],
+  'Chevrolet|Suburban|5.3L V8':              [[2021, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null], [2015, 2020, '5W-30', 8.0, 'WL10255', 'PH12060', null]],
+  'Chevrolet|Suburban|6.2L V8':              [[2015, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null]],
+  'GMC|Yukon|5.3L V8':                       [[2021, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null], [2015, 2020, '5W-30', 8.0, 'WL10255', 'PH12060', null]],
+  'GMC|Yukon|6.2L V8':                       [[2015, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null]],
+  'GMC|Yukon XL|5.3L V8':                    [[2021, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null], [2015, 2020, '5W-30', 8.0, 'WL10255', 'PH12060', null]],
+  'GMC|Yukon XL|6.2L V8':                    [[2015, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null]],
+  'Cadillac|Escalade|6.2L V8':               [[2015, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null]],
+  'Cadillac|Escalade ESV|6.2L V8':           [[2015, 9999, '0W-20', 8.0, 'WL10255', 'PH12060', null]],
+
+  // ── Chevy Colorado / GMC Canyon ─────────────────────────────────────────
+  'Chevrolet|Colorado|2.5L I4':              [[2015, 2022, '0W-20', 5.0, '57502', 'PH10575', null]],
+  'Chevrolet|Colorado|3.6L V6':              [[2015, 2022, '5W-30', 6.0, 'WL10255', 'PH10060', null]],
+  'Chevrolet|Colorado|2.7L I4 Turbo':        [[2023, 9999, '0W-20', 6.0, 'WL10351', 'PH12447', null]],
+  'GMC|Canyon|2.5L I4':                      [[2015, 2022, '0W-20', 5.0, '57502', 'PH10575', null]],
+  'GMC|Canyon|3.6L V6':                      [[2015, 2022, '5W-30', 6.0, 'WL10255', 'PH10060', null]],
+  'GMC|Canyon|2.7L I4 Turbo':                [[2023, 9999, '0W-20', 6.0, 'WL10351', 'PH12447', null]],
+
+  // ── Chevy Camaro ─────────────────────────────────────────────────────────
+  'Chevrolet|Camaro|2.0L I4 Turbo':          [[2016, 9999, '0W-20', 4.2, 'WL10255', 'PH12060', null]],
+  'Chevrolet|Camaro|3.6L V6':                [[2010, 9999, '5W-30', 5.9, 'WL10255', 'PH12060', null]],
+  'Chevrolet|Camaro|6.2L V8 LT1':            [[2016, 9999, '5W-30', 8.0, 'WL10255', 'PH12060', null]],
+  'Chevrolet|Camaro|6.2L V8 ZL1':            [[2017, 9999, '5W-30', 8.0, 'WL10255', 'PH12060', null]],
+  'Chevrolet|Camaro|6.2L V8':                [[2010, 2015, '5W-30', 8.0, 'WL10255', 'PH12060', null]],
+
+  // ── Ford F-150 (all share FL-500-S; oil weight/capacity differs by engine) ──
+  'Ford|F-150|3.7L V6':                      [[2011, 2014, '5W-20', 6.0, '57502', 'PH10575', 'FL-500-S']],
+  'Ford|F-150|3.5L V6':                      [[2015, 2020, '5W-20', 6.0, '57502', 'PH10575', 'FL-500-S']],
+  'Ford|F-150|3.5L V6 EcoBoost':             [[2015, 9999, '5W-30', 6.0, '57502', 'PH10575', 'FL-500-S'], [2011, 2014, '5W-30', 6.0, '57502', 'PH10575', 'FL-500-S']],
+  'Ford|F-150|3.5L V6 PowerBoost HEV':       [[2021, 9999, '5W-30', 6.0, '57502', 'PH10575', 'FL-500-S']],
+  'Ford|F-150|2.7L V6 EcoBoost':             [[2015, 9999, '5W-30', 6.0, '57502', 'PH10575', 'FL-500-S']],
+  'Ford|F-150|3.3L V6':                      [[2018, 9999, '5W-20', 6.0, '57502', 'PH10575', 'FL-500-S']],
+  'Ford|F-150|5.0L V8':                      [[2021, 9999, '5W-30', 8.0, '57502', 'PH10575', 'FL-500-S'], [2011, 2020, '5W-20', 8.0, '57502', 'PH10575', 'FL-500-S']],
+  'Ford|F-150|6.2L V8':                      [[2011, 2014, '5W-20', 7.0, '51372', 'PH2', 'FL-820-S']],
+
+  // ── Ford Mustang ─────────────────────────────────────────────────────────
+  'Ford|Mustang|2.3L I4 EcoBoost':           [[2015, 9999, '5W-30', 5.7, '51348', 'PH3614', 'FL-910-S']],
+  'Ford|Mustang|5.0L V8 GT':                 [[2015, 9999, '5W-20', 10.0, '57502', 'PH10575', 'FL-500-S']],
+  'Ford|Mustang|5.2L V8 GT350':              [[2015, 2020, '5W-50', 12.0, '57502', 'PH10575', 'FL-500-S']],
+  'Ford|Mustang|5.2L V8 GT500':              [[2020, 9999, '5W-50', 12.0, '57502', 'PH10575', 'FL-500-S']],
+
+  // ── Ford Explorer ────────────────────────────────────────────────────────
+  'Ford|Explorer|2.0L I4 EcoBoost':          [[2011, 2015, '5W-20', 5.0, '51348', 'PH3614', 'FL-910-S']],
+  'Ford|Explorer|2.3L I4 EcoBoost':          [[2016, 9999, '5W-30', 5.7, '51348', 'PH3614', 'FL-910-S']],
+  'Ford|Explorer|3.5L V6':                   [[2011, 2019, '5W-20', 6.0, '57502', 'PH10575', 'FL-500-S']],
+  'Ford|Explorer|3.5L V6 EcoBoost':          [[2013, 2019, '5W-30', 6.0, '57502', 'PH10575', 'FL-500-S']],
+  'Ford|Explorer|3.0L V6 EcoBoost':          [[2020, 9999, '5W-30', 5.7, '57502', 'PH10575', 'FL-500-S']],
+
+  // ── Ford Bronco ──────────────────────────────────────────────────────────
+  'Ford|Bronco|2.3L I4 EcoBoost':            [[2021, 9999, '5W-30', 5.7, '51348', 'PH3614', 'FL-910-S']],
+  'Ford|Bronco|2.7L V6 EcoBoost':            [[2021, 9999, '5W-30', 5.7, '57502', 'PH10575', 'FL-500-S']],
+
+  // ── Ram 1500 ─────────────────────────────────────────────────────────────
+  // 3.6L Pentastar: cartridge Mopar 68191349AC = Wix WL10010 = Fram CH11665
+  // 5.7L HEMI: spin-on Mopar 4884899AC = Wix 57899 = Fram PH2
+  'Ram|1500|3.6L V6 Pentastar':              [[2019, 9999, '5W-20', 5.9, 'WL10010', 'CH11665', null], [2013, 2018, '5W-20', 5.9, 'WL10010', 'CH11665', null]],
+  'Ram|1500|5.7L V8 HEMI':                   [[2009, 9999, '5W-20', 7.0, '57899', 'PH2', null]],
+  'Ram|1500|3.7L V6':                        [[2009, 2012, '5W-20', 4.5, '57060', 'PH10060', null]],
+  'Ram|1500|4.7L V8':                        [[2009, 2012, '5W-20', 5.9, '57060', 'PH10060', null]],
+  'Ram|2500|5.7L V8 HEMI':                   [[2014, 9999, '5W-20', 7.0, '57899', 'PH2', null]],
+  'Ram|2500|6.4L V8 HEMI':                   [[2014, 9999, '0W-40', 7.0, '57899', 'PH2', null]],
+  'Ram|3500|5.7L V8 HEMI':                   [[2014, 9999, '5W-20', 7.0, '57899', 'PH2', null]],
+  'Ram|3500|6.4L V8 HEMI':                   [[2014, 9999, '0W-40', 7.0, '57899', 'PH2', null]],
+
+  // ── Dodge Challenger / Charger ───────────────────────────────────────────
+  'Dodge|Challenger|3.6L V6 Pentastar':      [[2011, 9999, '5W-20', 5.9, 'WL10010', 'CH11665', null]],
+  'Dodge|Challenger|5.7L V8 HEMI':           [[2011, 9999, '5W-20', 7.0, '57899', 'PH2', null]],
+  'Dodge|Challenger|6.4L V8 HEMI':           [[2012, 9999, '0W-40', 7.0, '57899', 'PH2', null]],
+  'Dodge|Challenger|6.2L V8 Hellcat':        [[2015, 9999, '5W-20', 7.0, '57899', 'PH2', null]],
+  'Dodge|Charger|3.6L V6 Pentastar':         [[2011, 9999, '5W-20', 5.9, 'WL10010', 'CH11665', null]],
+  'Dodge|Charger|5.7L V8 HEMI':              [[2011, 9999, '5W-20', 7.0, '57899', 'PH2', null]],
+  'Dodge|Charger|6.4L V8 HEMI':              [[2012, 9999, '0W-40', 7.0, '57899', 'PH2', null]],
+  'Dodge|Charger|6.2L V8 Hellcat':           [[2015, 9999, '5W-20', 7.0, '57899', 'PH2', null]],
+  'Dodge|Durango|3.6L V6 Pentastar':         [[2011, 9999, '5W-20', 5.9, 'WL10010', 'CH11665', null]],
+  'Dodge|Durango|5.7L V8 HEMI':              [[2011, 9999, '5W-20', 7.0, '57899', 'PH2', null]],
+  'Dodge|Durango|6.4L V8 HEMI':              [[2018, 9999, '0W-40', 7.0, '57899', 'PH2', null]],
+
+  // ── Jeep ─────────────────────────────────────────────────────────────────
+  // Wrangler JL (2018+) 3.6L: cartridge WL10010; JK (2012-2017) 3.6L: spin-on 57060
+  // 2.0T JL uses spin-on Mopar 4892339BE = Wix 57060 = Fram PH10060
+  'Jeep|Wrangler|2.0L I4 Turbo':             [[2018, 9999, '0W-20', 5.0, '57060', 'PH10060', null]],
+  'Jeep|Wrangler|3.6L V6 Pentastar':         [[2018, 9999, '0W-20', 6.0, 'WL10010', 'CH11665', null], [2012, 2017, '5W-20', 6.0, '57060', 'PH10060', null]],
+  'Jeep|Wrangler Unlimited|2.0L I4 Turbo':   [[2018, 9999, '0W-20', 5.0, '57060', 'PH10060', null]],
+  'Jeep|Wrangler Unlimited|3.6L V6 Pentastar':[[2018, 9999, '0W-20', 6.0, 'WL10010', 'CH11665', null], [2012, 2017, '5W-20', 6.0, '57060', 'PH10060', null]],
+  'Jeep|Gladiator|3.6L V6 Pentastar':        [[2020, 9999, '0W-20', 6.0, 'WL10010', 'CH11665', null]],
+  'Jeep|Grand Cherokee|3.6L V6 Pentastar':   [[2021, 9999, '0W-20', 5.9, 'WL10010', 'CH11665', null], [2011, 2020, '5W-20', 5.9, 'WL10010', 'CH11665', null]],
+  'Jeep|Grand Cherokee|5.7L V8 HEMI':        [[2011, 9999, '5W-20', 7.0, '57899', 'PH2', null]],
+  'Jeep|Grand Cherokee|6.4L V8 HEMI':        [[2013, 9999, '0W-40', 7.0, '57899', 'PH2', null]],
+  'Jeep|Grand Cherokee|2.0L I4 Turbo':       [[2021, 9999, '0W-20', 5.0, '57060', 'PH10060', null]],
+  'Jeep|Grand Cherokee L|3.6L V6 Pentastar': [[2021, 9999, '0W-20', 5.9, 'WL10010', 'CH11665', null]],
+  'Jeep|Grand Cherokee L|5.7L V8 HEMI':      [[2021, 9999, '5W-20', 7.0, '57899', 'PH2', null]],
+  'Jeep|Cherokee|2.4L I4 Tigershark':        [[2014, 2018, '0W-20', 5.0, '57060', 'PH10060', null]],
+  'Jeep|Cherokee|3.2L V6 Pentastar':         [[2014, 9999, '0W-20', 5.0, '57060', 'PH10060', null]],
+  'Jeep|Cherokee|2.0L I4 Turbo':             [[2019, 9999, '0W-20', 5.0, '57060', 'PH10060', null]],
+
+  // ── Toyota Tacoma ────────────────────────────────────────────────────────
+  'Toyota|Tacoma|2.7L I4':                   [[2016, 9999, '0W-20', 5.8, '51348', 'PH4967', null], [2005, 2015, '5W-30', 5.5, '51348', 'PH4967', null]],
+  'Toyota|Tacoma|3.5L V6':                   [[2016, 9999, '0W-20', 6.1, '59924TR', 'CH9972', null]],
+  'Toyota|Tacoma|4.0L V6':                   [[2005, 2015, '5W-30', 5.5, '57047', 'PH4967', null]],
+
+  // ── Toyota Tundra ────────────────────────────────────────────────────────
+  'Toyota|Tundra|4.6L V8':                   [[2010, 2021, '0W-20', 8.5, 'WL7528', 'CH10295', null]],
+  'Toyota|Tundra|4.7L V8':                   [[2007, 2009, '5W-30', 6.5, '57047', 'PH4967', null]],
+  'Toyota|Tundra|5.7L V8':                   [[2007, 2021, '0W-20', 8.5, 'WL7528', 'CH10295', null]],
+  'Toyota|Tundra|3.5L V6 Turbo':             [[2022, 9999, '0W-35', 7.3, '51348', 'PH4967', null]],
+  'Toyota|Tundra|3.5L V6 Turbo i-FORCE MAX HEV': [[2022, 9999, '0W-35', 7.3, '51348', 'PH4967', null]],
+
+  // ── Toyota 4Runner / Sequoia ──────────────────────────────────────────────
+  'Toyota|4Runner|4.0L V6':                  [[2010, 9999, '5W-30', 5.5, '57047', 'PH4967', null]],
+  'Toyota|Sequoia|4.6L V8':                  [[2010, 2021, '0W-20', 8.5, 'WL7528', 'CH10295', null]],
+  'Toyota|Sequoia|5.7L V8':                  [[2008, 2021, '0W-20', 8.5, 'WL7528', 'CH10295', null]],
+
+  // ── Toyota Highlander ────────────────────────────────────────────────────
+  'Toyota|Highlander|2.7L I4':               [[2014, 2019, '0W-20', 4.4, '51348', 'PH4967', null]],
+  'Toyota|Highlander|3.5L V6':               [[2014, 9999, '0W-20', 6.4, '57047', 'CH9972', null]],
+  'Toyota|Highlander|2.5L I4 Hybrid':        [[2020, 9999, '0W-20', 6.4, '57047', 'CH25723', null]],
+
+  // ── Honda Accord ─────────────────────────────────────────────────────────
+  'Honda|Accord|1.5L I4 Turbo':              [[2018, 9999, '0W-20', 3.4, '57356', 'PH7317', null]],
+  'Honda|Accord|2.0L I4 Turbo':              [[2018, 9999, '0W-20', 4.6, '57356', 'PH7317', null]],
+  'Honda|Accord|2.4L I4':                    [[2013, 2017, '0W-20', 4.2, '57356', 'PH7317', null]],
+  'Honda|Accord|3.5L V6':                    [[2013, 2017, '0W-20', 4.2, '57356', 'PH7317', null]],
+
+  // ── Nissan Altima / Frontier ─────────────────────────────────────────────
+  'Nissan|Altima|2.0L VC-Turbo':             [[2019, 9999, '0W-20', 4.6, '51358', 'PH6607', null]],
+  'Nissan|Altima|2.5L I4':                   [[2019, 9999, '0W-20', 4.6, '51358', 'PH6607', null], [2013, 2018, '5W-30', 4.9, '51358', 'PH6607', null]],
+  'Nissan|Altima|3.5L V6':                   [[2013, 2018, '5W-30', 5.1, '57356', 'PH7317', null]],
+  'Nissan|Frontier|2.5L I4':                 [[2005, 2021, '5W-30', 4.2, '51358', 'PH6607', null]],
+  'Nissan|Frontier|4.0L V6':                 [[2005, 2021, '5W-30', 5.1, '57356', 'PH7317', null]],
+  'Nissan|Frontier|3.8L V6':                 [[2022, 9999, '5W-30', 5.1, '57356', 'PH7317', null]],
+
+  // ── Subaru ───────────────────────────────────────────────────────────────
+  'Subaru|WRX|2.0L H4 Turbo FA20DIT':        [[2015, 2021, '5W-30', 5.4, 'WL10078', 'XG9688', null]],
+  'Subaru|WRX|2.4L H4 Turbo':                [[2022, 9999, '5W-30', 5.4, '57055', 'PH9688', null]],
+  'Subaru|BRZ|2.0L H4 FA20':                 [[2017, 2021, '5W-30', 5.3, '57055', 'PH9688', null]],
+  'Subaru|BRZ|2.4L H4 FA24':                 [[2022, 9999, '5W-30', 5.3, '57055', 'PH9688', null]],
+
+  // ── BMW ──────────────────────────────────────────────────────────────────
+  'BMW|3 Series|2.0L I4 B48 (330i)':         [[2019, 9999, '0W-30', 5.3, 'WL10358', null, null]],
+  'BMW|3 Series|3.0L I6 B58 (M340i)':        [[2019, 9999, '0W-30', 6.3, 'WL10358', null, null]],
+  'BMW|5 Series|2.0L I4 B48 (530i)':         [[2017, 9999, '0W-30', 5.3, 'WL10358', null, null]],
+  'BMW|5 Series|3.0L I6 B58 (540i)':         [[2017, 9999, '0W-30', 6.3, 'WL10358', null, null]],
+  'BMW|X5|3.0L I6 B58 (xDrive40i)':          [[2019, 9999, '0W-30', 7.4, 'WL10358', null, null]],
+}
+
+// Return vehicle-specific engine options for the given year/make/model.
+// Returns [] for vehicles not in ENGINES_DB (single-engine models).
+export function getEngineOptions(make, model, year) {
+  const key = `${make}|${model}`
+  let ranges = ENGINES_DB[key]
+
+  if (!ranges) {
+    const k = Object.keys(ENGINES_DB).find(k => {
+      const [m, mod] = k.split('|')
+      return m === make && (
+        model.startsWith(mod) || mod.startsWith(model) ||
+        model.toLowerCase().replace(/[^a-z0-9]/g, '') === mod.toLowerCase().replace(/[^a-z0-9]/g, '')
+      )
+    })
+    ranges = k ? ENGINES_DB[k] : null
+  }
+
+  if (!ranges) return []
+  const yr = Number(year)
+  const entry = ranges.find(([from, to]) => yr >= from && yr <= to)
+  return entry ? entry[2] : []
 }

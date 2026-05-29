@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { getVehicles, deleteVehicle, getUserProfile } from '../services/db'
+import { useUserPrefs } from '../contexts/UserPrefsContext'
+import { getVehicles, deleteVehicle, getUserProfile, saveVehicle } from '../services/db'
+import { fmtDist } from '../utils/units'
 import './GaragePage.css'
 
 export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }) {
   const { user } = useAuth()
+  const { prefs } = useUserPrefs()
   const [vehicles, setVehicles] = useState([])
   const [profile, setProfile] = useState({})
   const [loading, setLoading] = useState(true)
+  const photoInputRef = useRef(null)
+  const photoTargetRef = useRef(null)
 
   const load = () => {
     Promise.all([
@@ -25,6 +30,38 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }
     load()
   }
 
+  const handlePhotoPick = (vehicleId) => {
+    photoTargetRef.current = vehicleId
+    photoInputRef.current?.click()
+  }
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file || !photoTargetRef.current) return
+    e.target.value = ''
+
+    const img = new Image()
+    const objectUrl = URL.createObjectURL(file)
+    img.onload = async () => {
+      URL.revokeObjectURL(objectUrl)
+      const MAX = 256
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height))
+      const w = Math.round(img.width * scale)
+      const h = Math.round(img.height * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82)
+
+      const vehicle = vehicles.find(v => v.id === photoTargetRef.current)
+      if (!vehicle) return
+      await saveVehicle(user.uid, { ...vehicle, photoURL: dataUrl })
+      setVehicles(prev => prev.map(v => v.id === vehicle.id ? { ...v, photoURL: dataUrl } : v))
+    }
+    img.src = objectUrl
+  }
+
   const rawName = profile.displayName || user?.email?.split('@')[0]?.split('.')[0] || ''
   const greeting = rawName
     ? rawName.charAt(0).toUpperCase() + rawName.slice(1) + "'s Garage"
@@ -34,7 +71,7 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }
     <div className="garage-page">
       <div className="garage-header">
         <div className="garage-header-top">
-          <span className="garage-wordmark">Klutch</span>
+          <span className="garage-wordmark">Klyp</span>
           <button className="settings-gear-btn" onClick={onSettings} title="Settings">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3"/>
@@ -58,7 +95,17 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }
           <div className="vehicle-list">
             {vehicles.map(v => (
               <div key={v.id} className="vehicle-card" onClick={() => onSelectVehicle(v)}>
-                <div className="vehicle-badge">{v.make?.charAt(0) || 'V'}</div>
+                <button
+                  className="vehicle-badge-wrap"
+                  onClick={e => { e.stopPropagation(); handlePhotoPick(v.id) }}
+                  title="Change photo"
+                >
+                  {v.photoURL
+                    ? <img className="vehicle-badge-img" src={v.photoURL} alt="" />
+                    : <div className="vehicle-badge">{v.make?.charAt(0) || 'V'}</div>
+                  }
+                  <span className="vehicle-badge-camera" aria-hidden="true">📷</span>
+                </button>
                 <div className="vehicle-info">
                   <div className="vehicle-name">
                     {v.nickname || `${v.year} ${v.make} ${v.model}`}
@@ -67,7 +114,7 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }
                     <div className="vehicle-sub">{v.year} {v.make} {v.model}</div>
                   )}
                   <div className="vehicle-meta">
-                    <span className="vehicle-mileage-chip">{v.currentMileage?.toLocaleString()} mi</span>
+                    <span className="vehicle-mileage-chip">{fmtDist(v.currentMileage, prefs.useMetric)}</span>
                     {v.engineType && <span className="vehicle-engine-chip">{v.engineType}</span>}
                   </div>
                 </div>
@@ -87,7 +134,24 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }
         )}
       </div>
 
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        style={{ display: 'none' }}
+        onChange={handlePhotoChange}
+      />
+
       <button className="fab" onClick={onAddVehicle}>+ Add Vehicle</button>
+
+      <footer className="garage-footer">
+        <p className="garage-footer-disclaimer">
+          Vehicle specs, oil weights, and filter data are provided for reference only.
+          Always verify service information with your owner's manual or a qualified technician.
+        </p>
+        <p className="garage-footer-copy">© {new Date().getFullYear()} Klyp. All rights reserved.</p>
+      </footer>
     </div>
   )
 }

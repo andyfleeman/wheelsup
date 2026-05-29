@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useUserPrefs } from '../contexts/UserPrefsContext'
+import { fmtDist, fromMiles, toMiles } from '../utils/units'
 import { MAINTENANCE_ITEMS } from '../data/maintenanceItems'
 import { saveMaintenanceRecord, getMaintenanceRecords, deleteMaintenanceRecord, saveInterval, getIntervals, saveVehicle } from '../services/db'
 import MaintenanceCard from '../components/MaintenanceCard'
 import LogServiceModal from '../components/LogServiceModal'
+import VoiceLogger from '../components/VoiceLogger'
 import LogbookPage from './LogbookPage'
 import './VehicleDashboard.css'
 
 export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   const { user } = useAuth()
+  const { prefs } = useUserPrefs()
   const [records, setRecords]           = useState([])
   const [intervals, setIntervals]       = useState({})
   const [currentMileage, setCurrentMileage] = useState(vehicle.currentMileage)
@@ -16,6 +20,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   const [mileageInput, setMileageInput] = useState(vehicle.currentMileage)
   const [logItem, setLogItem]           = useState(null)
   const [resetItem, setResetItem]       = useState(null)
+  const [voiceActive, setVoiceActive]   = useState(false)
   const [tab, setTab]                   = useState('schedule') // 'schedule' | 'logbook'
 
   useEffect(() => {
@@ -66,7 +71,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
 
   const getOverdueItems = () => {
     const today = new Date()
-    return MAINTENANCE_ITEMS.filter(item => {
+    return visibleItems.filter(item => {
       // Mileage overdue
       const next = getNextMileage(item)
       if (next && currentMileage >= next) return true
@@ -82,7 +87,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   }
 
   const handleUpdateMileage = async () => {
-    const val = Number(mileageInput)
+    const val = toMiles(mileageInput, prefs.useMetric)
     if (!val || val < 0) return
     setCurrentMileage(val)
     setEditingMileage(false)
@@ -112,12 +117,38 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
     setResetItem(null)
   }
 
+  const handleVoiceConfirm = async ({ services, mileage }) => {
+    const resolvedMileage = (mileage != null) ? mileage : currentMileage
+    for (const serviceId of services) {
+      const item = MAINTENANCE_ITEMS.find(i => i.id === serviceId)
+      if (!item) continue
+      await handleLogService({
+        itemId:    serviceId,
+        itemLabel: item.label,
+        type:      'service',
+        mileage:   resolvedMileage,
+        date:      new Date().toISOString(),
+        notes:     'Logged via voice',
+        cost:      null,
+        subItems:  [],
+      })
+    }
+    setVoiceActive(false)
+  }
+
+  const visibleItems = MAINTENANCE_ITEMS.filter(
+    item => !(prefs.hiddenServices ?? []).includes(item.id)
+  )
+
   const vehicleLabel = vehicle.nickname || `${vehicle.year} ${vehicle.make} ${vehicle.model}`
 
   return (
     <div className="vehicle-dashboard">
       <div className="page-header">
         <button className="back-btn" onClick={onBack}>←</button>
+        {vehicle.photoURL && (
+          <img className="header-vehicle-photo" src={vehicle.photoURL} alt="" />
+        )}
         <div className="header-title">
           <h2>{vehicleLabel}</h2>
           {vehicle.nickname && (
@@ -140,9 +171,9 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
             <button onClick={() => setEditingMileage(false)}>Cancel</button>
           </div>
         ) : (
-          <div className="mileage-display" onClick={() => { setMileageInput(currentMileage); setEditingMileage(true) }}>
-            <span className="mileage-label">Current Mileage</span>
-            <span className="mileage-value">{currentMileage.toLocaleString()} mi</span>
+          <div className="mileage-display" onClick={() => { setMileageInput(fromMiles(currentMileage, prefs.useMetric)); setEditingMileage(true) }}>
+            <span className="mileage-label">Current {prefs.useMetric ? 'Kilometers' : 'Mileage'}</span>
+            <span className="mileage-value">{fmtDist(currentMileage, prefs.useMetric)}</span>
             <span className="mileage-tap">tap to update</span>
           </div>
         )}
@@ -184,7 +215,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
                   >
                     <span>{item.label}</span>
                     <span className="overdue-detail">
-                      {milesOver > 0 ? `${milesOver.toLocaleString()} mi overdue` : 'time limit reached'} · Log now →
+                      {milesOver > 0 ? `${fmtDist(milesOver, prefs.useMetric)} overdue` : 'time limit reached'} · Log now →
                     </span>
                   </button>
                 )
@@ -211,7 +242,20 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
 
       {tab === 'schedule' && (
         <div className="cards-list">
-          {MAINTENANCE_ITEMS.map(item => (
+          <button
+            className="voice-log-btn"
+            onClick={() => setVoiceActive(true)}
+            title="Log services by voice"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="9" y="2" width="6" height="13" rx="3" />
+              <path d="M5 10a7 7 0 0 0 14 0" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+              <line x1="9" y1="21" x2="15" y2="21" />
+            </svg>
+            Log by Voice
+          </button>
+          {visibleItems.map(item => (
             <MaintenanceCard
               key={item.id}
               item={item}
@@ -220,6 +264,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
               currentMileage={currentMileage}
               intervalMiles={getInterval(item)}
               dueInfo={getDueInfo(item)}
+              useMetric={prefs.useMetric}
               onIntervalChange={(miles) => handleIntervalChange(item.id, miles)}
               onLog={() => setLogItem(item)}
               onReset={item.resetAction ? () => setResetItem(item) : undefined}
@@ -238,6 +283,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
           currentMileage={currentMileage}
           oilWeight={vehicle.oilWeight}
           filterPartNumber={vehicle.filterPartNumber}
+          useMetric={prefs.useMetric}
           onSave={handleLogService}
           onClose={() => setLogItem(null)}
           resetMode={false}
@@ -248,11 +294,20 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
         <LogServiceModal
           item={resetItem}
           currentMileage={currentMileage}
+          useMetric={prefs.useMetric}
           onSave={handleLogService}
           onClose={() => setResetItem(null)}
           resetMode={true}
         />
       )}
+
+      <VoiceLogger
+        active={voiceActive}
+        currentMileage={currentMileage}
+        useMetric={prefs.useMetric}
+        onConfirm={handleVoiceConfirm}
+        onClose={() => setVoiceActive(false)}
+      />
     </div>
   )
 }

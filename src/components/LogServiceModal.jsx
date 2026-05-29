@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { playBurnout } from '../utils/sounds'
+import { fromMiles, toMiles, distUnit } from '../utils/units'
 import './LogServiceModal.css'
 
-export default function LogServiceModal({ item, currentMileage, oilWeight, filterPartNumber, onSave, onClose, resetMode }) {
-  const [mileage, setMileage] = useState(currentMileage)
+export default function LogServiceModal({ item, currentMileage, oilWeight, filterPartNumber, useMetric, onSave, onClose, resetMode }) {
+  const [mileage, setMileage] = useState(fromMiles(currentMileage, useMetric))
   const [notes, setNotes]     = useState('')
   const [cost, setCost]       = useState('')
   const [checked, setChecked] = useState({})
@@ -22,7 +23,7 @@ export default function LogServiceModal({ item, currentMileage, oilWeight, filte
       itemLabel: item.label,
       type:      resetMode ? 'reset' : 'service',
       resetLabel: resetMode ? item.resetAction?.label : null,
-      mileage:   Number(mileage),
+      mileage:   toMiles(mileage, useMetric),
       date:      new Date().toISOString(),
       notes,
       cost:      cost ? parseFloat(parseFloat(cost).toFixed(2)) : null,
@@ -61,7 +62,7 @@ export default function LogServiceModal({ item, currentMileage, oilWeight, filte
         )}
 
         <label className="modal-label">
-          <span>Mileage at service</span>
+          <span>{useMetric ? 'Kilometers' : 'Mileage'} at service</span>
           <input
             type="number"
             value={mileage}

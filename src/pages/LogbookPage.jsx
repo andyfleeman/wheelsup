@@ -126,7 +126,7 @@ export default function LogbookPage({ vehicle, records, onDeleteRecord }) {
           </table>
         )}
 
-        <div className="logbook-print-footer">Klutch — Vehicle Maintenance Tracker</div>
+        <div className="logbook-print-footer">Klyp — Vehicle Maintenance Tracker</div>
       </div>
     </div>
   )

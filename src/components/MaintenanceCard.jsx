@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { fmtDist, fromMiles, toMiles, distUnit } from '../utils/units'
 import './MaintenanceCard.css'
 
-function statusInfo(item, nextMileage, currentMileage, lastRecord) {
+function statusInfo(item, nextMileage, currentMileage, lastRecord, useMetric) {
   if (!lastRecord && !nextMileage) return { label: 'Not tracked', color: '#aaa', pct: 0 }
   if (!nextMileage) return { label: 'No interval set', color: '#aaa', pct: 0 }
 
@@ -9,16 +10,16 @@ function statusInfo(item, nextMileage, currentMileage, lastRecord) {
   const remaining = nextMileage - currentMileage
   const pct = Math.max(0, Math.min(100, (remaining / intervalMiles) * 100))
 
-  if (remaining <= 0) return { label: `${Math.abs(remaining).toLocaleString()} mi overdue`, color: '#c62828', pct: 0 }
-  if (remaining <= intervalMiles * 0.1) return { label: `${remaining.toLocaleString()} mi left`, color: '#f57c00', pct }
-  return { label: `Next at ${nextMileage.toLocaleString()} mi`, color: '#2e7d32', pct }
+  if (remaining <= 0) return { label: `${fmtDist(Math.abs(remaining), useMetric)} overdue`, color: '#c62828', pct: 0 }
+  if (remaining <= intervalMiles * 0.1) return { label: `${fmtDist(remaining, useMetric)} left`, color: '#f57c00', pct }
+  return { label: `Next at ${fmtDist(nextMileage, useMetric)}`, color: '#2e7d32', pct }
 }
 
 export default function MaintenanceCard({
-  item, lastRecord, nextMileage, currentMileage, intervalMiles, dueInfo, onIntervalChange, onLog, onReset
+  item, lastRecord, nextMileage, currentMileage, intervalMiles, dueInfo, useMetric, onIntervalChange, onLog, onReset
 }) {
   const [editingInterval, setEditingInterval] = useState(false)
-  const [intervalInput, setIntervalInput] = useState(intervalMiles || item.defaultIntervalMiles || '')
+  const [intervalInput, setIntervalInput] = useState('')
   const [expanded, setExpanded] = useState(false)
 
   const { estimatedDate, reason } = dueInfo || {}
@@ -38,14 +39,14 @@ export default function MaintenanceCard({
   })()
 
   const mileageStatus = item.unit === 'miles'
-    ? statusInfo(item, nextMileage, currentMileage, lastRecord)
+    ? statusInfo(item, nextMileage, currentMileage, lastRecord, useMetric)
     : { label: item.defaultIntervalMonths ? `Every ${item.defaultIntervalMonths} mo` : 'Time-based', color: '#1a73e8', pct: 50 }
 
   const status = mileageStatus
   const borderColor = (isTimeLimitSooner && timeStatus) ? timeStatus.color : status.color
 
   const handleIntervalSave = () => {
-    const val = Number(intervalInput)
+    const val = toMiles(Number(intervalInput), useMetric)
     if (val > 0) onIntervalChange(val)
     setEditingInterval(false)
   }
@@ -111,7 +112,7 @@ export default function MaintenanceCard({
             <div className="detail-section">
               <div className="detail-row">
                 <span className="detail-key">Last done</span>
-                <span className="detail-val">{lastRecord.mileage.toLocaleString()} mi{lastDoneDate ? ` · ${lastDoneDate}` : ''}</span>
+                <span className="detail-val">{fmtDist(lastRecord.mileage, useMetric)}{lastDoneDate ? ` · ${lastDoneDate}` : ''}</span>
               </div>
               {lastRecord.cost != null && (
                 <div className="detail-row">
@@ -140,13 +141,13 @@ export default function MaintenanceCard({
                       onChange={e => setIntervalInput(e.target.value)}
                       autoFocus
                     />
-                    <span className="interval-unit">mi</span>
+                    <span className="interval-unit">{distUnit(useMetric)}</span>
                     <button className="interval-save-btn" onClick={handleIntervalSave}>Save</button>
                     <button className="interval-cancel-btn" onClick={() => setEditingInterval(false)}>✕</button>
                   </span>
                 ) : (
-                  <span className="interval-value" onClick={() => { setIntervalInput(intervalMiles); setEditingInterval(true) }}>
-                    {(intervalMiles || item.defaultIntervalMiles || '—').toLocaleString()} mi
+                  <span className="interval-value" onClick={() => { setIntervalInput(fromMiles(intervalMiles || item.defaultIntervalMiles, useMetric)); setEditingInterval(true) }}>
+                    {fmtDist(intervalMiles || item.defaultIntervalMiles, useMetric)}
                     <span className="edit-hint"> · edit</span>
                   </span>
                 )}

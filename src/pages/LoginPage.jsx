@@ -21,7 +21,7 @@ export default function LoginPage() {
                   stroke="white" strokeWidth="7.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
           </svg>
         </div>
-        <h1 className="login-wordmark">Klutch</h1>
+        <h1 className="login-wordmark">Klyp</h1>
         <p className="login-tagline">Your garage. Never miss a service.</p>
 
         <button className="google-btn" onClick={login}>

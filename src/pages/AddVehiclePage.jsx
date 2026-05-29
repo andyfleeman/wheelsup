@@ -1,34 +1,52 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useUserPrefs } from '../contexts/UserPrefsContext'
 import { MAKES, getModels, getYears } from '../data/vehicles.js'
 import { saveVehicle } from '../services/db'
 import { ENGINE_TYPES } from '../data/maintenanceItems'
-import { lookupOilSpec, filterSearchUrl } from '../data/vehicleSpecs'
+import { lookupOilSpec, filterSearchUrl, getEngineOptions } from '../data/vehicleSpecs'
 import { playCarFlyby } from '../utils/sounds'
+import { fromMiles, toMiles, distUnit } from '../utils/units'
 import './AddVehiclePage.css'
 
 const YEARS = getYears()
 
+function fmtVolume(qt, useMetric) {
+  if (!qt) return null
+  if (useMetric) return `${(qt * 0.946352).toFixed(1)} L`
+  return `${qt} qt`
+}
+
 export default function AddVehiclePage({ onSaved, onCancel, existing }) {
   const { user } = useAuth()
-  const [form, setForm] = useState({
-    make: '', model: '', year: '', engineType: '',
-    currentMileage: '', dailyMiles: '', nickname: '',
-    oilWeight: '', filterPartNumber: '',
-    ...(existing || {}),
+  const { prefs } = useUserPrefs()
+  const [form, setForm] = useState(() => {
+    const base = { make: '', model: '', year: '', engineType: '',
+      currentMileage: '', dailyMiles: '', nickname: '',
+      oilWeight: '', filterPartNumber: '' }
+    if (!existing) return base
+    return {
+      ...base,
+      ...existing,
+      currentMileage: fromMiles(existing.currentMileage, prefs.useMetric) || '',
+      dailyMiles:     fromMiles(existing.dailyMiles, prefs.useMetric) || '',
+    }
   })
   const [saving, setSaving] = useState(false)
   const [oilAutoFilled, setOilAutoFilled] = useState(false)
   const [filterAutoFilled, setFilterAutoFilled] = useState(false)
 
   const models = form.make ? getModels(form.make) : []
+  const engineOptions = (form.make && form.model && form.year)
+    ? getEngineOptions(form.make, form.model, form.year)
+    : []
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
-  // Auto-populate oil weight + filter from local OEM database when vehicle identity changes
+  // Auto-populate oil weight + filter when vehicle identity or engine changes
   useEffect(() => {
     if (existing) return
     if (!form.make || !form.model || !form.year) return
-    const spec = lookupOilSpec(form.make, form.model, form.year)
+    const spec = lookupOilSpec(form.make, form.model, form.year, form.engineType || null)
 
     // Known EV — clear any previously set values and bail
     if (spec !== null && spec.oil === null) {
@@ -58,7 +76,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
     }
 
     if (Object.keys(updates).length) setForm(f => ({ ...f, ...updates }))
-  }, [form.make, form.model, form.year])
+  }, [form.make, form.model, form.year, form.engineType])
 
   const handleSubmit = async e => {
     e.preventDefault()
@@ -67,8 +85,8 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
     try {
       await saveVehicle(user.uid, {
         ...form,
-        currentMileage: Number(form.currentMileage),
-        dailyMiles: form.dailyMiles ? Number(form.dailyMiles) : null,
+        currentMileage: toMiles(form.currentMileage, prefs.useMetric),
+        dailyMiles: form.dailyMiles ? toMiles(form.dailyMiles, prefs.useMetric) : null,
         year: Number(form.year),
       })
       if (!existing) playCarFlyby()
@@ -79,7 +97,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
   }
 
   const dbSpec = (form.make && form.model && form.year)
-    ? lookupOilSpec(form.make, form.model, form.year)
+    ? lookupOilSpec(form.make, form.model, form.year, form.engineType || null)
     : null
 
   const isKnownEV = dbSpec !== null && dbSpec.oil === null
@@ -116,7 +134,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
 
         <label>
           Make *
-          <select value={form.make} onChange={e => { set('make', e.target.value); set('model', '') }} required>
+          <select value={form.make} onChange={e => { set('make', e.target.value); set('model', ''); set('engineType', '') }} required>
             <option value="">Select make...</option>
             {MAKES.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
@@ -124,25 +142,27 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
 
         <label>
           Model *
-          <select value={form.model} onChange={e => set('model', e.target.value)} required disabled={!form.make}>
+          <select value={form.model} onChange={e => { set('model', e.target.value); set('engineType', '') }} required disabled={!form.make}>
             <option value="">{form.make ? 'Select model...' : 'Select make first'}</option>
             {models.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
         </label>
 
-        <label>
-          Engine Type
-          <select value={form.engineType} onChange={e => set('engineType', e.target.value)}>
-            <option value="">Select engine type...</option>
-            {ENGINE_TYPES.map(e => <option key={e} value={e}>{e}</option>)}
-          </select>
-        </label>
+        {engineOptions.length > 0 && (
+          <label>
+            Engine
+            <select value={form.engineType} onChange={e => set('engineType', e.target.value)}>
+              <option value="">Select engine...</option>
+              {engineOptions.map(e => <option key={e} value={e}>{e}</option>)}
+            </select>
+          </label>
+        )}
 
         <label>
-          Current Mileage *
+          Current {prefs.useMetric ? 'Kilometers' : 'Mileage'} *
           <input
             type="number"
-            placeholder="e.g. 150000"
+            placeholder={prefs.useMetric ? 'e.g. 241000' : 'e.g. 150000'}
             value={form.currentMileage}
             onChange={e => set('currentMileage', e.target.value)}
             min="0"
@@ -151,10 +171,10 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
         </label>
 
         <label>
-          Average Daily Miles
+          Average Daily {prefs.useMetric ? 'KM' : 'Miles'}
           <input
             type="number"
-            placeholder="e.g. 62"
+            placeholder={prefs.useMetric ? 'e.g. 100' : 'e.g. 62'}
             value={form.dailyMiles}
             onChange={e => set('dailyMiles', e.target.value)}
             min="1"
@@ -188,7 +208,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
               </div>
               {dbSpec?.qt ? (
                 <span className="field-hint">
-                  {oilAutoFilled ? 'Looked up from OEM specs · ' : ''}Capacity: ~{dbSpec.qt} qt — verify with owner's manual
+                  {oilAutoFilled ? 'Looked up from OEM specs · ' : ''}Capacity: ~{fmtVolume(dbSpec.qt, prefs.useMetric)} — verify with owner's manual
                 </span>
               ) : (
                 <span className="field-hint">Check your oil cap or owner's manual</span>

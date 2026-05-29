@@ -140,6 +140,20 @@
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
+.vehicle-badge-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 12px;
+}
+
+.vehicle-badge-wrap:hover .vehicle-badge-camera { opacity: 1; }
+
 .vehicle-badge {
   width: 48px;
   height: 48px;
@@ -153,6 +167,27 @@
   color: white;
   flex-shrink: 0;
   letter-spacing: -0.02em;
+}
+
+.vehicle-badge-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+}
+
+.vehicle-badge-camera {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  background: rgba(0,0,0,0.45);
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.15s;
 }
 
 .vehicle-info {
@@ -260,3 +295,28 @@
 }
 
 .fab:active { transform: translateX(-50%) scale(0.98); }
+
+/* ── Footer ── */
+.garage-footer {
+  padding: 1.5rem 1.5rem calc(env(safe-area-inset-bottom) + 1.5rem);
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 1rem;
+}
+
+.garage-footer-disclaimer {
+  font-size: 0.68rem;
+  color: #bbb;
+  line-height: 1.5;
+  margin: 0 0 0.4rem;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.garage-footer-copy {
+  font-size: 0.65rem;
+  color: #ccc;
+  margin: 0;
+  letter-spacing: 0.03em;
+}

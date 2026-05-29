@@ -1,21 +1,41 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useUserPrefs } from '../contexts/UserPrefsContext'
 import { getUserProfile, saveUserProfile } from '../services/db'
+import { fromMiles, toMiles, distUnit } from '../utils/units'
+import { MAINTENANCE_ITEMS } from '../data/maintenanceItems'
 import './SettingsPage.css'
 
 export default function SettingsPage({ onBack }) {
   const { user, logout } = useAuth()
+  const { prefs, updatePref } = useUserPrefs()
   const [displayName, setDisplayName]         = useState('')
   const [defaultOilInterval, setDefaultOilInterval] = useState('')
   const [alertDays, setAlertDays]             = useState('')
   const [saving, setSaving]   = useState(false)
   const [saved, setSaved]     = useState(false)
   const [loading, setLoading] = useState(true)
+  const [notifPermission, setNotifPermission] = useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
+  )
+
+  const handleRequestNotifications = async () => {
+    if (typeof Notification === 'undefined') return
+    if (Notification.permission === 'denied') return
+    const result = await Notification.requestPermission()
+    setNotifPermission(result)
+    if (result === 'granted') {
+      new Notification('Klyp notifications enabled', {
+        body: 'You\'ll be reminded when service is due.',
+        icon: '/wheelsup/favicon.svg',
+      })
+    }
+  }
 
   useEffect(() => {
     getUserProfile(user.uid).then(p => {
       setDisplayName(p.displayName || '')
-      setDefaultOilInterval(p.defaultOilInterval || '')
+      setDefaultOilInterval(p.defaultOilInterval ? fromMiles(p.defaultOilInterval, prefs.useMetric) : '')
       setAlertDays(p.alertDays || '')
       setLoading(false)
     })
@@ -25,7 +45,7 @@ export default function SettingsPage({ onBack }) {
     setSaving(true)
     await saveUserProfile(user.uid, {
       displayName:        displayName.trim() || null,
-      defaultOilInterval: defaultOilInterval ? Number(defaultOilInterval) : null,
+      defaultOilInterval: defaultOilInterval ? toMiles(Number(defaultOilInterval), prefs.useMetric) : null,
       alertDays:          alertDays ? Number(alertDays) : null,
     })
     setSaving(false)
@@ -82,10 +102,10 @@ export default function SettingsPage({ onBack }) {
                     min="500"
                     step="500"
                   />
-                  <span className="settings-unit">mi</span>
+                  <span className="settings-unit">{distUnit(prefs.useMetric)}</span>
                 </div>
               </label>
-              <div className="settings-hint">Your preferred oil change frequency. App default is 5,000 mi.</div>
+              <div className="settings-hint">Your preferred oil change frequency. App default is {prefs.useMetric ? '8,000 km' : '5,000 mi'}.</div>
 
               <label className="settings-row">
                 <span className="settings-row-label">Alert Window</span>
@@ -105,6 +125,106 @@ export default function SettingsPage({ onBack }) {
               <div className="settings-hint">How far ahead to surface upcoming service warnings.</div>
             </div>
           </div>
+
+          <div className="settings-section">
+            <div className="settings-section-title">App</div>
+            <div className="settings-group">
+              <div className="settings-row settings-row-toggle">
+                <div>
+                  <span className="settings-row-label">Sound Effects</span>
+                  <div className="settings-hint settings-hint-inline">Play audio cues when adding vehicles and logging service</div>
+                </div>
+                <button
+                  className={`settings-toggle${prefs.soundsEnabled ? ' settings-toggle--on' : ''}`}
+                  onClick={() => updatePref('soundsEnabled', !prefs.soundsEnabled)}
+                  aria-pressed={prefs.soundsEnabled}
+                >
+                  <span className="settings-toggle-knob" />
+                </button>
+              </div>
+
+              <div className="settings-row settings-row-toggle">
+                <div>
+                  <span className="settings-row-label">Units</span>
+                  <div className="settings-hint settings-hint-inline">Oil capacity display — quarts or liters</div>
+                </div>
+                <div className="settings-unit-toggle">
+                  <button
+                    className={`settings-unit-btn${!prefs.useMetric ? ' settings-unit-btn--active' : ''}`}
+                    onClick={() => updatePref('useMetric', false)}
+                  >Imperial</button>
+                  <button
+                    className={`settings-unit-btn${prefs.useMetric ? ' settings-unit-btn--active' : ''}`}
+                    onClick={() => updatePref('useMetric', true)}
+                  >Metric</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="settings-section">
+            <div className="settings-section-title">Service Schedule</div>
+            <div className="settings-hint" style={{ paddingTop: '0.5rem' }}>Choose which services appear in your vehicle dashboard.</div>
+            <div className="settings-group">
+              {MAINTENANCE_ITEMS.map(item => {
+                const hidden = prefs.hiddenServices?.includes(item.id)
+                return (
+                  <div key={item.id} className="settings-row settings-row-toggle">
+                    <div>
+                      <span className="settings-row-label">{item.icon} {item.label}</span>
+                    </div>
+                    <button
+                      className={`settings-toggle${!hidden ? ' settings-toggle--on' : ''}`}
+                      onClick={() => {
+                        const current = prefs.hiddenServices ?? []
+                        const next = hidden
+                          ? current.filter(id => id !== item.id)
+                          : [...current, item.id]
+                        updatePref('hiddenServices', next)
+                      }}
+                      aria-pressed={!hidden}
+                    >
+                      <span className="settings-toggle-knob" />
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {notifPermission !== 'unsupported' && (
+            <div className="settings-section">
+              <div className="settings-section-title">Notifications</div>
+              <div className="settings-group">
+                {notifPermission === 'granted' ? (
+                  <div className="settings-row">
+                    <span className="settings-row-label">Service Reminders</span>
+                    <span className="notif-status notif-status--on">Enabled</span>
+                  </div>
+                ) : notifPermission === 'denied' ? (
+                  <>
+                    <div className="settings-row">
+                      <span className="settings-row-label">Service Reminders</span>
+                      <span className="notif-status notif-status--off">Blocked</span>
+                    </div>
+                    <div className="settings-hint">
+                      Notifications are blocked. To enable: open your device&rsquo;s Settings → Browser/App → Notifications and allow Klyp.
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="settings-row">
+                      <span className="settings-row-label">Service Reminders</span>
+                      <button className="notif-enable-btn" onClick={handleRequestNotifications}>
+                        Enable
+                      </button>
+                    </div>
+                    <div className="settings-hint">Get reminded when oil changes and other services are coming due.</div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
 
           <button
             className={`settings-save-btn${saved ? ' settings-save-btn--saved' : ''}`}
@@ -131,7 +251,7 @@ export default function SettingsPage({ onBack }) {
                 <path d="M13 10 L13 30 M13 20 L23 10 M13 20 L25 30"
                       stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
               </svg>
-              <span className="settings-about-name">Klutch</span>
+              <span className="settings-about-name">Klyp</span>
             </div>
             <div className="settings-about-tagline">Your garage. Never miss a service.</div>
             <div className="settings-about-version">v1.0 · Vehicle Maintenance Tracker</div>
