@@ -158,7 +158,7 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
     setUiState(STATE.PROCESSING)
 
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`
 
     try {
       const response = await fetch(url, {
