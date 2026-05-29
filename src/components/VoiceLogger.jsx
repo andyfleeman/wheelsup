@@ -158,7 +158,7 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
     setUiState(STATE.PROCESSING)
 
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
 
     try {
       const response = await fetch(url, {
@@ -166,12 +166,12 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: buildGeminiPrompt(transcript) }] }],
-          generationConfig: { responseMimeType: 'application/json' },
         }),
       })
 
       if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.status}`)
+        const errBody = await response.text().catch(() => '')
+        throw new Error(`Gemini API error: ${response.status} ${errBody}`)
       }
 
       const data = await response.json()
@@ -181,7 +181,9 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
         throw new Error('Empty response from Gemini')
       }
 
-      const result = JSON.parse(rawText)
+      // Strip markdown code fences if present (```json ... ```)
+      const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
+      const result = JSON.parse(cleaned)
 
       // Validate services list
       if (!Array.isArray(result.services) || result.services.length === 0) {
