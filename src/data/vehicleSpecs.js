@@ -11,6 +11,7 @@ const DB = {
   },
   Audi: {
     A3:      [[2015, 9999, '5W-40', 4.5]],
+    'e-tron': [[2019, 9999, null, null]], // BEV
     A4:      [[2017, 9999, '5W-40', 4.5], [2012, 2016, '5W-40', 5.3]],
     A6:      [[2019, 9999, '5W-30', 6.3], [2012, 2018, '5W-40', 5.8]],
     Q3:      [[2015, 9999, '5W-40', 4.5]],
@@ -25,6 +26,11 @@ const DB = {
     '4 Series': [[2014, 9999, '0W-30', 5.3]],
     '5 Series': [[2017, 9999, '0W-30', 6.3], [2011, 2016, '5W-30', 6.3]],
     '7 Series': [[2016, 9999, '0W-30', 7.4]],
+    i3:         [[2014, 2021, null, null]], // BEV
+    i4:         [[2022, 9999, null, null]], // BEV
+    i5:         [[2024, 9999, null, null]], // BEV
+    i7:         [[2023, 9999, null, null]], // BEV
+    iX:         [[2022, 9999, null, null]], // BEV
     M2:         [[2023, 9999, '10W-60', 6.3], [2016, 2022, '10W-60', 5.8]],
     M3:         [[2021, 9999, '10W-60', 6.3], [2015, 2020, '10W-60', 5.8]],
     M4:         [[2021, 9999, '10W-60', 6.3], [2015, 2020, '10W-60', 5.8]],
@@ -46,6 +52,7 @@ const DB = {
   Cadillac: {
     ATS:        [[2013, 2019, '5W-30', 5.0]],
     CT4:        [[2020, 9999, '5W-30', 5.0]],
+    LYRIQ:      [[2023, 9999, null, null]], // BEV
     CT5:        [[2020, 9999, '5W-30', 5.0]],
     CTS:        [[2014, 9999, '5W-30', 5.0]],
     Escalade:   [[2021, 9999, '0W-20', 8.0], [2015, 2020, '5W-30', 8.0]],
@@ -58,6 +65,8 @@ const DB = {
   },
   Chevrolet: {
     Blazer:       [[2019, 9999, '5W-30', 5.0]],
+    'Bolt EV':    [[2017, 9999, null, null]], // BEV
+    'Bolt EUV':   [[2022, 9999, null, null]], // BEV
     Camaro:       [[2016, 9999, '5W-30', 5.9]], // V6; V8 is 8.0 qt
     Colorado:     [[2015, 9999, '5W-30', 5.0]],
     Corvette:     [[2020, 9999, '5W-50', 9.5], [2014, 2019, '5W-30', 8.0]],
@@ -93,6 +102,7 @@ const DB = {
   },
   Ford: {
     Bronco:       [[2021, 9999, '5W-30', 5.7]],
+    'E-Transit':  [[2022, 9999, null, null]], // BEV
     'Bronco Sport': [[2021, 9999, '5W-30', 4.3]],
     EcoSport:     [[2018, 2022, '5W-20', 4.3]],
     Edge:         [[2019, 9999, '5W-30', 5.7], [2015, 2018, '5W-30', 6.0]],
@@ -141,6 +151,8 @@ const DB = {
     Accent:     [[2017, 9999, '5W-30', 3.5]],
     Elantra:    [[2021, 9999, '5W-30', 3.7], [2017, 2020, '5W-20', 3.7], [2011, 2016, '5W-20', 3.7]],
     IONIQ:      [[2017, 2022, '0W-20', 3.7]], // hybrid
+    'IONIQ 5':  [[2022, 9999, null, null]], // BEV
+    'IONIQ 6':  [[2023, 9999, null, null]], // BEV
     Kona:       [[2018, 9999, '5W-20', 3.9]],
     Palisade:   [[2020, 9999, '5W-30', 6.6]],
     'Santa Cruz': [[2022, 9999, '5W-30', 5.3]],
@@ -241,6 +253,7 @@ const DB = {
   },
   Nissan: {
     Altima:    [[2019, 9999, '0W-20', 4.6], [2013, 2018, '5W-30', 4.9]],
+    Leaf:      [[2011, 9999, null, null]], // BEV
     Armada:    [[2017, 9999, '5W-30', 6.5], [2004, 2016, '5W-30', 6.5]],
     Frontier:  [[2022, 9999, '5W-30', 5.1], [2005, 2021, '5W-30', 5.1]],
     Kicks:     [[2018, 9999, '0W-20', 3.4]],
@@ -290,20 +303,242 @@ const DB = {
     Atlas:          [[2018, 9999, '5W-40', 6.5]],
     'Atlas Cross Sport': [[2020, 9999, '5W-40', 5.5]],
     'Golf GTI':     [[2015, 9999, '5W-40', 4.5]],
-    ID4:            [[2021, 9999, null, null]], // EV
+    'ID.4':         [[2021, 9999, null, null]], // BEV
     Jetta:          [[2019, 9999, '5W-40', 4.5], [2011, 2018, '5W-40', 4.5]],
     Taos:           [[2022, 9999, '5W-40', 4.5]],
     Tiguan:         [[2018, 9999, '5W-40', 5.5], [2009, 2017, '5W-40', 4.5]],
     Touareg:        [[2018, 9999, '5W-40', 7.4]],
   },
+  Tesla: {
+    Cybertruck: [[2024, 9999, null, null]], // BEV
+    'Model 3':  [[2017, 9999, null, null]], // BEV
+    'Model S':  [[2012, 9999, null, null]], // BEV
+    'Model X':  [[2015, 9999, null, null]], // BEV
+    'Model Y':  [[2020, 9999, null, null]], // BEV
+  },
 }
 
-// Match a vehicle to its spec entry
+// Oil filter part numbers keyed by "Make Model"
+// Sources: Wix, Fram, Motorcraft fitment data; forum/parts-retailer cross-references
+// Always verify against your specific VIN/engine at a parts store before buying
+const FILTER_DB = {
+  'Toyota 4Runner':          { wix: '57047',   fram: 'PH4967'   },
+  'Toyota Avalon':           { wix: '57047',   fram: 'CH25723'  },
+  'Toyota Camry':            { wix: '57047',   fram: 'CH25723'  },
+  'Toyota Corolla':          { wix: '51348',   fram: 'PH4967'   },
+  'Toyota GR86':             { wix: '57055',   fram: 'PH9688'   },
+  'Toyota Highlander':       { wix: '57047',   fram: 'CH9972'   },
+  'Toyota Prius':            { wix: '51348',   fram: 'PH4967'   },
+  'Toyota RAV4':             { wix: '57047',   fram: 'CH25723'  },
+  'Toyota Sequoia':          { wix: '57310',   fram: 'CH10295'  },
+  'Toyota Sienna':           { wix: '57047',   fram: 'CH9972'   },
+  'Toyota Supra':            { wix: 'WL10358'                   },
+  'Toyota Tacoma':           { wix: '59924TR', fram: 'CH9972'   },
+  'Toyota Tundra':           { wix: '57310',   fram: 'CH10295'  },
+  'Toyota Venza':            { wix: '51348',   fram: 'PH4967'   },
+  'Honda Accord':            { wix: '57356',   fram: 'PH7317'   },
+  'Honda Civic':             { wix: '57356',   fram: 'PH7317'   },
+  'Honda CR-V':              { wix: '57356',   fram: 'PH7317'   },
+  'Honda Fit':               { wix: '57356',   fram: 'PH7317'   },
+  'Honda HR-V':              { wix: '57356',   fram: 'PH7317'   },
+  'Honda Insight':           { wix: '57356',   fram: 'PH7317'   },
+  'Honda Odyssey':           { wix: '57356',   fram: 'PH6607'   },
+  'Honda Passport':          { wix: '57356',   fram: 'PH6607'   },
+  'Honda Pilot':             { wix: '57356',   fram: 'PH6607'   },
+  'Honda Ridgeline':         { wix: '57356',   fram: 'PH6607'   },
+  'Ford Bronco':             { wix: '51348',   fram: 'PH3614',  motorcraft: 'FL-910-S' },
+  'Ford Bronco Sport':       { wix: '51348',   fram: 'PH3614',  motorcraft: 'FL-910-S' },
+  'Ford EcoSport':           { wix: '51348',   fram: 'PH3614',  motorcraft: 'FL-910-S' },
+  'Ford Edge':               { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Ford Escape':             { wix: '51348',   fram: 'PH3614',  motorcraft: 'FL-910-S' },
+  'Ford Expedition':         { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Ford Explorer':           { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Ford F-150':              { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Ford F-250 Super Duty':   { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Ford F-350 Super Duty':   { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Ford Fusion':             { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Ford Maverick':           { wix: '51348',   fram: 'PH3614',  motorcraft: 'FL-910-S' },
+  'Ford Mustang':            { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Ford Ranger':             { wix: '51348',   fram: 'PH3614',  motorcraft: 'FL-910-S' },
+  'Ford Taurus':             { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Ford Transit':            { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Chevrolet Blazer':        { wix: 'WL10255', fram: 'PH12060' },
+  'Chevrolet Camaro':        { wix: 'WL10255', fram: 'PH12060' },
+  'Chevrolet Colorado':      { wix: 'WL10255', fram: 'PH12060' },
+  'Chevrolet Equinox':       { wix: 'WL10255', fram: 'PH12060' },
+  'Chevrolet Malibu':        { wix: 'WL10255', fram: 'PH12060' },
+  'Chevrolet Silverado 1500':{ wix: 'WL10255', fram: 'PH12060' },
+  'Chevrolet Silverado 2500HD':{ wix: 'WL10255', fram: 'PH12060' },
+  'Chevrolet Silverado 3500HD':{ wix: 'WL10255', fram: 'PH12060' },
+  'Chevrolet Suburban':      { wix: 'WL10255', fram: 'PH12060' },
+  'Chevrolet Tahoe':         { wix: 'WL10255', fram: 'PH12060' },
+  'Chevrolet Traverse':      { wix: 'WL10255', fram: 'PH12060' },
+  'Chevrolet Trax':          { wix: 'WL10255', fram: 'PH12060' },
+  'GMC Acadia':              { wix: 'WL10255', fram: 'PH12060' },
+  'GMC Canyon':              { wix: 'WL10255', fram: 'PH12060' },
+  'GMC Sierra 1500':         { wix: 'WL10255', fram: 'PH12060' },
+  'GMC Sierra 2500HD':       { wix: 'WL10255', fram: 'PH12060' },
+  'GMC Sierra 3500HD':       { wix: 'WL10255', fram: 'PH12060' },
+  'GMC Terrain':             { wix: 'WL10255', fram: 'PH12060' },
+  'GMC Yukon':               { wix: 'WL10255', fram: 'PH12060' },
+  'GMC Yukon XL':            { wix: 'WL10255', fram: 'PH12060' },
+  'Buick Enclave':           { wix: 'WL10255', fram: 'PH12060' },
+  'Buick Encore':            { wix: 'WL10255', fram: 'PH12060' },
+  'Buick Encore GX':         { wix: 'WL10255', fram: 'PH12060' },
+  'Buick Envision':          { wix: 'WL10255', fram: 'PH12060' },
+  'Cadillac Escalade':       { wix: 'WL10255', fram: 'PH12060' },
+  'Cadillac Escalade ESV':   { wix: 'WL10255', fram: 'PH12060' },
+  'Cadillac XT4':            { wix: 'WL10255', fram: 'PH12060' },
+  'Cadillac XT5':            { wix: 'WL10255', fram: 'PH12060' },
+  'Cadillac XT6':            { wix: 'WL10255', fram: 'PH12060' },
+  'Chrysler 300':            { wix: '57899',   fram: 'PH10060' },
+  'Chrysler Pacifica':       { wix: '57899',   fram: 'PH10060' },
+  'Dodge Challenger':        { wix: '57899',   fram: 'PH10060' },
+  'Dodge Charger':           { wix: '57899',   fram: 'PH10060' },
+  'Dodge Durango':           { wix: '57899',   fram: 'PH10060' },
+  'Ram 1500':                { wix: '57899',   fram: 'PH10060' },
+  'Ram 2500':                { wix: '57899',   fram: 'PH10060' },
+  'Ram 3500':                { wix: '57899',   fram: 'PH10060' },
+  'Jeep Cherokee':           { wix: '57060',   fram: 'PH10060' },
+  'Jeep Compass':            { wix: '57060',   fram: 'PH10060' },
+  'Jeep Gladiator':          { wix: 'WL10255', fram: 'CH11665' },
+  'Jeep Grand Cherokee':     { wix: '57899',   fram: 'PH10060' },
+  'Jeep Grand Cherokee L':   { wix: '57899',   fram: 'PH10060' },
+  'Jeep Wrangler':           { wix: 'WL10255', fram: 'CH11665' },
+  'Jeep Wrangler Unlimited': { wix: 'WL10255', fram: 'CH11665' },
+  'Nissan Altima':           { wix: '51358',   fram: 'PH6607'  },
+  'Nissan Armada':           { wix: '57356',   fram: 'PH7317'  },
+  'Nissan Frontier':         { wix: '57356',   fram: 'PH7317'  },
+  'Nissan Kicks':            { wix: '51358',   fram: 'PH6607'  },
+  'Nissan Maxima':           { wix: '57356',   fram: 'PH7317'  },
+  'Nissan Murano':           { wix: '57356',   fram: 'PH7317'  },
+  'Nissan Pathfinder':       { wix: '57356',   fram: 'PH7317'  },
+  'Nissan Rogue':            { wix: '51358',   fram: 'PH6607'  },
+  'Nissan Rogue Sport':      { wix: '51358',   fram: 'PH6607'  },
+  'Nissan Sentra':           { wix: '51358',   fram: 'PH6607'  },
+  'Nissan Titan':            { wix: '57356',   fram: 'PH7317'  },
+  'Nissan Titan XD':         { wix: '57356',   fram: 'PH7317'  },
+  'Nissan Versa':            { wix: '51358',   fram: 'PH6607'  },
+  'Hyundai Accent':          { wix: '51334',   fram: 'PH5724'  },
+  'Hyundai Elantra':         { wix: '51334',   fram: 'PH5724'  },
+  'Hyundai IONIQ':           { wix: '51334',   fram: 'PH5724'  },
+  'Hyundai Kona':            { wix: '51334',   fram: 'PH5724'  },
+  'Hyundai Palisade':        { wix: '57356',   fram: 'PH7317'  },
+  'Hyundai Santa Cruz':      { wix: '51334',   fram: 'PH5724'  },
+  'Hyundai Santa Fe':        { wix: '51334',   fram: 'PH5724'  },
+  'Hyundai Sonata':          { wix: '51334',   fram: 'PH5724'  },
+  'Hyundai Tucson':          { wix: '51334',   fram: 'PH5724'  },
+  'Hyundai Veloster':        { wix: '51334',   fram: 'PH5724'  },
+  'Hyundai Venue':           { wix: '51334',   fram: 'PH5724'  },
+  'Kia Carnival':            { wix: '51334',   fram: 'PH5724'  },
+  'Kia Forte':               { wix: '51334',   fram: 'PH5724'  },
+  'Kia K5':                  { wix: '51334',   fram: 'PH5724'  },
+  'Kia Niro':                { wix: '51334',   fram: 'PH5724'  },
+  'Kia Seltos':              { wix: '51334',   fram: 'PH5724'  },
+  'Kia Soul':                { wix: '51334',   fram: 'PH5724'  },
+  'Kia Sorento':             { wix: '51334',   fram: 'PH5724'  },
+  'Kia Sportage':            { wix: '51334',   fram: 'PH5724'  },
+  'Kia Stinger':             { wix: '51334',   fram: 'PH5724'  },
+  'Kia Telluride':           { wix: '16615RK', fram: 'PH7317'  },
+  'Subaru Ascent':           { wix: '57055',   fram: 'PH9688'  },
+  'Subaru BRZ':              { wix: '57055',   fram: 'PH9688'  },
+  'Subaru Crosstrek':        { wix: '57055',   fram: 'PH9688'  },
+  'Subaru Forester':         { wix: '57055',   fram: 'PH9688'  },
+  'Subaru Impreza':          { wix: '57055',   fram: 'PH9688'  },
+  'Subaru Legacy':           { wix: '57055',   fram: 'PH9688'  },
+  'Subaru Outback':          { wix: '57055',   fram: 'PH9688'  },
+  'Subaru WRX':              { wix: 'WL10078', fram: 'XG9688'  },
+  'BMW 2 Series':            { wix: 'WL10358'                  },
+  'BMW 3 Series':            { wix: 'WL10358'                  },
+  'BMW 4 Series':            { wix: 'WL10358'                  },
+  'BMW 5 Series':            { wix: 'WL10358'                  },
+  'BMW 7 Series':            { wix: 'WL10358'                  },
+  'BMW M2':                  { wix: 'WL10358'                  },
+  'BMW M3':                  { wix: 'WL10358'                  },
+  'BMW M4':                  { wix: 'WL10358'                  },
+  'BMW M5':                  { wix: 'WL10358'                  },
+  'BMW X1':                  { wix: 'WL10358'                  },
+  'BMW X3':                  { wix: 'WL10358'                  },
+  'BMW X4':                  { wix: 'WL10358'                  },
+  'BMW X5':                  { wix: 'WL10358'                  },
+  'BMW X6':                  { wix: 'WL10358'                  },
+  'BMW X7':                  { wix: 'WL10358'                  },
+  'Mercedes-Benz A-Class':   { oem: '2701800109'               },
+  'Mercedes-Benz C-Class':   { oem: '2701800109'               },
+  'Mercedes-Benz CLA':       { oem: '2701800109'               },
+  'Mercedes-Benz CLS':       { oem: '2761800009'               },
+  'Mercedes-Benz E-Class':   { oem: '2701800109'               },
+  'Mercedes-Benz G-Class':   { oem: '2761800009'               },
+  'Mercedes-Benz GLA':       { oem: '2701800109'               },
+  'Mercedes-Benz GLB':       { oem: '2701800109'               },
+  'Mercedes-Benz GLC':       { oem: '2701800109'               },
+  'Mercedes-Benz GLE':       { oem: '2761800009'               },
+  'Mercedes-Benz GLS':       { oem: '2761800009'               },
+  'Mercedes-Benz S-Class':   { oem: '2761800009'               },
+  'Acura ILX':               { wix: '57356',   fram: 'PH7317'  },
+  'Acura MDX':               { wix: '57356',   fram: 'PH6607'  },
+  'Acura RDX':               { wix: '57356',   fram: 'PH7317'  },
+  'Acura TLX':               { wix: '57356',   fram: 'PH7317'  },
+  'Audi A3':                 { wix: 'WL10396', fram: 'CH11784' },
+  'Audi A4':                 { wix: 'WL10396', fram: 'CH11784' },
+  'Audi A6':                 { wix: 'WL10396', fram: 'CH11784' },
+  'Audi Q3':                 { wix: 'WL10396', fram: 'CH11784' },
+  'Audi Q5':                 { wix: 'WL10396', fram: 'CH11784' },
+  'Audi Q7':                 { wix: 'WL10396', fram: 'CH11784' },
+  'Audi Q8':                 { wix: 'WL10396', fram: 'CH11784' },
+  'Audi TT':                 { wix: 'WL10396', fram: 'CH11784' },
+  'Volkswagen Atlas':        { wix: 'WL10024', fram: 'CH11784' },
+  'Volkswagen Atlas Cross Sport': { wix: 'WL10024', fram: 'CH11784' },
+  'Volkswagen Golf GTI':     { wix: 'WL10024', fram: 'CH11784' },
+  'Volkswagen Jetta':        { wix: 'WL10024', fram: 'CH11784' },
+  'Volkswagen Taos':         { wix: 'WL10024', fram: 'CH11784' },
+  'Volkswagen Tiguan':       { wix: 'WL10024', fram: 'CH11784' },
+  'Volkswagen Touareg':      { wix: 'WL10396', fram: 'CH11784' },
+  'Mazda CX-30':             { wix: '57002'                    },
+  'Mazda CX-3':              { wix: '57002'                    },
+  'Mazda CX-5':              { wix: '57002'                    },
+  'Mazda CX-50':             { wix: '57002'                    },
+  'Mazda CX-9':              { wix: '57002'                    },
+  'Mazda Mazda3':            { wix: '57002'                    },
+  'Mazda Mazda6':            { wix: '57002'                    },
+  'Mazda MX-5 Miata':        { wix: '57002'                    },
+  'Infiniti Q50':            { wix: '57356',   fram: 'PH7317'  },
+  'Infiniti Q60':            { wix: '57356',   fram: 'PH7317'  },
+  'Infiniti QX50':           { wix: '57356',   fram: 'PH7317'  },
+  'Infiniti QX60':           { wix: '57356',   fram: 'PH7317'  },
+  'Infiniti QX80':           { wix: '57356',   fram: 'PH7317'  },
+  'Lexus ES':                { wix: '51348',   fram: 'PH4967'  },
+  'Lexus GS':                { wix: '57047',   fram: 'CH9972'  },
+  'Lexus GX':                { wix: '57047',   fram: 'PH4967'  },
+  'Lexus IS':                { wix: '57047',   fram: 'CH25723' },
+  'Lexus LC':                { wix: '57047',   fram: 'CH9972'  },
+  'Lexus LX':                { wix: '57310',   fram: 'CH10295' },
+  'Lexus NX':                { wix: '51348',   fram: 'PH4967'  },
+  'Lexus RC':                { wix: '57047',   fram: 'CH25723' },
+  'Lexus RX':                { wix: '57047',   fram: 'CH9972'  },
+  'Lexus TX':                { wix: '51348',   fram: 'PH4967'  },
+  'Lexus UX':                { wix: '51348',   fram: 'PH4967'  },
+  'Mitsubishi Eclipse Cross': { wix: '51334',  fram: 'PH5724'  },
+  'Mitsubishi Lancer':       { wix: '51334',   fram: 'PH5724'  },
+  'Mitsubishi Mirage':       { wix: '51334',   fram: 'PH5724'  },
+  'Mitsubishi Outlander':    { wix: '51334',   fram: 'PH5724'  },
+  'Mitsubishi Outlander Sport': { wix: '51334', fram: 'PH5724' },
+  'Lincoln Aviator':         { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Lincoln Continental':     { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Lincoln Corsair':         { wix: '51348',   fram: 'PH3614',  motorcraft: 'FL-910-S' },
+  'Lincoln MKX':             { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Lincoln MKZ':             { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Lincoln Nautilus':        { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+  'Lincoln Navigator':       { wix: '57502',   fram: 'PH10575', motorcraft: 'FL-500-S' },
+}
+
+// Match a vehicle to its oil + filter spec
 export function lookupOilSpec(make, model, year) {
   const makeData = DB[make]
   if (!makeData) return null
 
   let rows = makeData[model]
+  let resolvedModel = model
 
   // Fuzzy match: handle "Silverado 1500" → "Silverado", "Wrangler Unlimited" → "Wrangler", etc.
   if (!rows) {
@@ -311,7 +546,7 @@ export function lookupOilSpec(make, model, year) {
       model.startsWith(k) || k.startsWith(model) ||
       model.toLowerCase().replace(/[^a-z0-9]/g, '').includes(k.toLowerCase().replace(/[^a-z0-9]/g, ''))
     )
-    rows = key ? makeData[key] : null
+    if (key) { rows = makeData[key]; resolvedModel = key }
   }
 
   if (!rows) return null
@@ -322,7 +557,16 @@ export function lookupOilSpec(make, model, year) {
     .sort((a, b) => b[0] - a[0])[0]
 
   if (!match) return null
-  return { oil: match[2], qt: match[3] }
+
+  const filter = FILTER_DB[`${make} ${resolvedModel}`] ?? null
+  return {
+    oil:        match[2],
+    qt:         match[3],
+    wix:        filter?.wix        ?? null,
+    fram:       filter?.fram       ?? null,
+    motorcraft: filter?.motorcraft ?? null,
+    oem:        filter?.oem        ?? null,
+  }
 }
 
 // Build a pre-filled Google search URL for the oil filter

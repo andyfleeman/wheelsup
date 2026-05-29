@@ -19,21 +19,45 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
   })
   const [saving, setSaving] = useState(false)
   const [oilAutoFilled, setOilAutoFilled] = useState(false)
+  const [filterAutoFilled, setFilterAutoFilled] = useState(false)
 
   const models = form.make ? getModels(form.make) : []
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
-  // Auto-populate oil weight from local OEM database when vehicle identity changes
+  // Auto-populate oil weight + filter from local OEM database when vehicle identity changes
   useEffect(() => {
     if (existing) return
     if (!form.make || !form.model || !form.year) return
     const spec = lookupOilSpec(form.make, form.model, form.year)
+
+    // Known EV — clear any previously set values and bail
+    if (spec !== null && spec.oil === null) {
+      setOilAutoFilled(false)
+      setFilterAutoFilled(false)
+      setForm(f => ({ ...f, oilWeight: '', filterPartNumber: '' }))
+      return
+    }
+
+    const updates = {}
+
     if (spec?.oil) {
-      setForm(f => ({ ...f, oilWeight: spec.oil }))
+      updates.oilWeight = spec.oil
       setOilAutoFilled(true)
     } else {
       setOilAutoFilled(false)
     }
+
+    // Prefer Motorcraft for Ford/Lincoln (OEM), OEM number for Mercedes, Wix for all others
+    const filterNum = spec?.motorcraft || spec?.wix || spec?.oem || null
+    const filterBrand = spec?.motorcraft ? 'Motorcraft' : spec?.wix ? 'Wix' : spec?.oem ? 'OEM' : null
+    if (filterNum) {
+      updates.filterPartNumber = `${filterBrand} ${filterNum}`
+      setFilterAutoFilled(true)
+    } else {
+      setFilterAutoFilled(false)
+    }
+
+    if (Object.keys(updates).length) setForm(f => ({ ...f, ...updates }))
   }, [form.make, form.model, form.year])
 
   const handleSubmit = async e => {
@@ -58,7 +82,9 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
     ? lookupOilSpec(form.make, form.model, form.year)
     : null
 
-  const filterUrl = (form.make && form.model && form.year)
+  const isKnownEV = dbSpec !== null && dbSpec.oil === null
+
+  const filterUrl = (!isKnownEV && form.make && form.model && form.year)
     ? filterSearchUrl(form.year, form.make, form.model, form.engineType)
     : null
 
@@ -139,6 +165,13 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
         {/* Oil & Filter section — appears once year/make/model are selected */}
         {(form.make && form.model && form.year) && (
           <div className="oil-spec-section">
+            {isKnownEV && (
+              <div className="ev-notice">
+                <div className="oil-spec-section-title">Oil &amp; Filter</div>
+                <p className="ev-notice-text">Electric vehicle — no oil change required.</p>
+              </div>
+            )}
+            {!isKnownEV && (<>
             <div className="oil-spec-section-title">Oil &amp; Filter</div>
 
             <label>
@@ -167,12 +200,13 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
               <div className="filter-row">
                 <input
                   type="text"
-                  placeholder="e.g. Fram PH2, Wix 51069"
+                  placeholder="e.g. Wix 51069, Fram PH2"
                   value={form.filterPartNumber}
-                  onChange={e => set('filterPartNumber', e.target.value)}
+                  onChange={e => { set('filterPartNumber', e.target.value); setFilterAutoFilled(false) }}
                   className="filter-input"
                 />
-                {filterUrl && (
+                {filterAutoFilled && <span className="auto-badge">Auto-filled</span>}
+                {!filterAutoFilled && filterUrl && (
                   <a
                     href={filterUrl}
                     target="_blank"
@@ -183,8 +217,18 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
                   </a>
                 )}
               </div>
-              <span className="field-hint">Save once — shown every time you log an oil change</span>
+              {filterAutoFilled && dbSpec ? (
+                <span className="field-hint">
+                  Looked up from filter database
+                  {dbSpec.fram && !form.filterPartNumber?.includes('Fram') && ` · Alt: Fram ${dbSpec.fram}`}
+                  {dbSpec.wix && !form.filterPartNumber?.includes('Wix') && ` · Alt: Wix ${dbSpec.wix}`}
+                  {' · '}Verify by VIN at parts store
+                </span>
+              ) : (
+                <span className="field-hint">Save once — shown every time you log an oil change</span>
+              )}
             </label>
+            </>)}
           </div>
         )}
 
