@@ -318,3 +318,37 @@
   color: #ccc;
   letter-spacing: 0.03em;
 }
+
+/* ── Notification status ── */
+.notif-status {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 100px;
+}
+
+.notif-status--on {
+  background: rgba(46,125,50,0.1);
+  color: #2e7d32;
+  border: 1px solid rgba(46,125,50,0.2);
+}
+
+.notif-status--off {
+  background: rgba(198,40,40,0.08);
+  color: #c62828;
+  border: 1px solid rgba(198,40,40,0.15);
+}
+
+.notif-enable-btn {
+  padding: 0.4rem 1rem;
+  background: #1c1c1e;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.notif-enable-btn:hover { background: #c62828; }

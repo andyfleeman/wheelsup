@@ -6,6 +6,7 @@ import { MAINTENANCE_ITEMS } from '../data/maintenanceItems'
 import { saveMaintenanceRecord, getMaintenanceRecords, deleteMaintenanceRecord, saveInterval, getIntervals, saveVehicle } from '../services/db'
 import MaintenanceCard from '../components/MaintenanceCard'
 import LogServiceModal from '../components/LogServiceModal'
+import VoiceLogger from '../components/VoiceLogger'
 import LogbookPage from './LogbookPage'
 import './VehicleDashboard.css'
 
@@ -19,6 +20,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   const [mileageInput, setMileageInput] = useState(vehicle.currentMileage)
   const [logItem, setLogItem]           = useState(null)
   const [resetItem, setResetItem]       = useState(null)
+  const [voiceActive, setVoiceActive]   = useState(false)
   const [tab, setTab]                   = useState('schedule') // 'schedule' | 'logbook'
 
   useEffect(() => {
@@ -113,6 +115,25 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
     }
     setLogItem(null)
     setResetItem(null)
+  }
+
+  const handleVoiceConfirm = async ({ services, mileage }) => {
+    const resolvedMileage = (mileage != null) ? mileage : currentMileage
+    for (const serviceId of services) {
+      const item = MAINTENANCE_ITEMS.find(i => i.id === serviceId)
+      if (!item) continue
+      await handleLogService({
+        itemId:    serviceId,
+        itemLabel: item.label,
+        type:      'service',
+        mileage:   resolvedMileage,
+        date:      new Date().toISOString(),
+        notes:     'Logged via voice',
+        cost:      null,
+        subItems:  [],
+      })
+    }
+    setVoiceActive(false)
   }
 
   const vehicleLabel = vehicle.nickname || `${vehicle.year} ${vehicle.make} ${vehicle.model}`
@@ -214,6 +235,19 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
 
       {tab === 'schedule' && (
         <div className="cards-list">
+          <button
+            className="voice-log-btn"
+            onClick={() => setVoiceActive(true)}
+            title="Log services by voice"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="9" y="2" width="6" height="13" rx="3" />
+              <path d="M5 10a7 7 0 0 0 14 0" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+              <line x1="9" y1="21" x2="15" y2="21" />
+            </svg>
+            Log by Voice
+          </button>
           {MAINTENANCE_ITEMS.map(item => (
             <MaintenanceCard
               key={item.id}
@@ -259,6 +293,14 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
           resetMode={true}
         />
       )}
+
+      <VoiceLogger
+        active={voiceActive}
+        currentMileage={currentMileage}
+        useMetric={prefs.useMetric}
+        onConfirm={handleVoiceConfirm}
+        onClose={() => setVoiceActive(false)}
+      />
     </div>
   )
 }

@@ -14,6 +14,22 @@ export default function SettingsPage({ onBack }) {
   const [saving, setSaving]   = useState(false)
   const [saved, setSaved]     = useState(false)
   const [loading, setLoading] = useState(true)
+  const [notifPermission, setNotifPermission] = useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
+  )
+
+  const handleRequestNotifications = async () => {
+    if (typeof Notification === 'undefined') return
+    if (Notification.permission === 'denied') return
+    const result = await Notification.requestPermission()
+    setNotifPermission(result)
+    if (result === 'granted') {
+      new Notification('Klyp notifications enabled', {
+        body: 'You\'ll be reminded when service is due.',
+        icon: '/wheelsup/favicon.svg',
+      })
+    }
+  }
 
   useEffect(() => {
     getUserProfile(user.uid).then(p => {
@@ -145,6 +161,40 @@ export default function SettingsPage({ onBack }) {
             </div>
           </div>
 
+          {notifPermission !== 'unsupported' && (
+            <div className="settings-section">
+              <div className="settings-section-title">Notifications</div>
+              <div className="settings-group">
+                {notifPermission === 'granted' ? (
+                  <div className="settings-row">
+                    <span className="settings-row-label">Service Reminders</span>
+                    <span className="notif-status notif-status--on">Enabled</span>
+                  </div>
+                ) : notifPermission === 'denied' ? (
+                  <>
+                    <div className="settings-row">
+                      <span className="settings-row-label">Service Reminders</span>
+                      <span className="notif-status notif-status--off">Blocked</span>
+                    </div>
+                    <div className="settings-hint">
+                      Notifications are blocked. To enable: open your device&rsquo;s Settings → Browser/App → Notifications and allow Klyp.
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="settings-row">
+                      <span className="settings-row-label">Service Reminders</span>
+                      <button className="notif-enable-btn" onClick={handleRequestNotifications}>
+                        Enable
+                      </button>
+                    </div>
+                    <div className="settings-hint">Get reminded when oil changes and other services are coming due.</div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
           <button
             className={`settings-save-btn${saved ? ' settings-save-btn--saved' : ''}`}
             onClick={handleSave}
@@ -170,7 +220,7 @@ export default function SettingsPage({ onBack }) {
                 <path d="M13 10 L13 30 M13 20 L23 10 M13 20 L25 30"
                       stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
               </svg>
-              <span className="settings-about-name">Klutch</span>
+              <span className="settings-about-name">Klyp</span>
             </div>
             <div className="settings-about-tagline">Your garage. Never miss a service.</div>
             <div className="settings-about-version">v1.0 · Vehicle Maintenance Tracker</div>

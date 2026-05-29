@@ -1,6 +1,6 @@
 {
-  "name": "Klutch",
-  "short_name": "Klutch",
+  "name": "Klyp",
+  "short_name": "Klyp",
   "description": "Your garage. Never miss a service.",
   "start_url": "/wheelsup/",
   "display": "standalone",

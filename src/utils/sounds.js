@@ -2,17 +2,17 @@
 
 function isSoundsEnabled() {
   try {
-    const stored = localStorage.getItem('klutch_prefs')
+    const stored = localStorage.getItem('klyp_prefs')
     if (!stored) return true
     return JSON.parse(stored).soundsEnabled !== false
   } catch { return true }
 }
 
 function getCtx() {
-  if (!window._klutchAudioCtx) {
-    window._klutchAudioCtx = new (window.AudioContext || window.webkitAudioContext)()
+  if (!window._klypAudioCtx) {
+    window._klypAudioCtx = new (window.AudioContext || window.webkitAudioContext)()
   }
-  return window._klutchAudioCtx
+  return window._klypAudioCtx
 }
 
 // Race car flyby: engine roar that sweeps in pitch then fades

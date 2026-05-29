@@ -4,7 +4,7 @@ const DEFAULTS = { soundsEnabled: true, useMetric: false }
 
 function loadPrefs() {
   try {
-    const stored = localStorage.getItem('klutch_prefs')
+    const stored = localStorage.getItem('klyp_prefs')
     return stored ? { ...DEFAULTS, ...JSON.parse(stored) } : { ...DEFAULTS }
   } catch {
     return { ...DEFAULTS }
@@ -19,7 +19,7 @@ export function UserPrefsProvider({ children }) {
   const updatePref = useCallback((key, value) => {
     setPrefs(prev => {
       const next = { ...prev, [key]: value }
-      try { localStorage.setItem('klutch_prefs', JSON.stringify(next)) } catch {}
+      try { localStorage.setItem('klyp_prefs', JSON.stringify(next)) } catch {}
       return next
     })
   }, [])

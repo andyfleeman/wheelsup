@@ -37,7 +37,7 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }
     <div className="garage-page">
       <div className="garage-header">
         <div className="garage-header-top">
-          <span className="garage-wordmark">Klutch</span>
+          <span className="garage-wordmark">Klyp</span>
           <button className="settings-gear-btn" onClick={onSettings} title="Settings">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3"/>
@@ -91,6 +91,14 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }
       </div>
 
       <button className="fab" onClick={onAddVehicle}>+ Add Vehicle</button>
+
+      <footer className="garage-footer">
+        <p className="garage-footer-disclaimer">
+          Vehicle specs, oil weights, and filter data are provided for reference only.
+          Always verify service information with your owner's manual or a qualified technician.
+        </p>
+        <p className="garage-footer-copy">© {new Date().getFullYear()} Klyp. All rights reserved.</p>
+      </footer>
     </div>
   )
 }
