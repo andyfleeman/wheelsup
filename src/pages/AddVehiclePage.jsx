@@ -29,6 +29,15 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
     if (existing) return
     if (!form.make || !form.model || !form.year) return
     const spec = lookupOilSpec(form.make, form.model, form.year)
+
+    // Known EV — clear any previously set values and bail
+    if (spec !== null && spec.oil === null) {
+      setOilAutoFilled(false)
+      setFilterAutoFilled(false)
+      setForm(f => ({ ...f, oilWeight: '', filterPartNumber: '' }))
+      return
+    }
+
     const updates = {}
 
     if (spec?.oil) {
@@ -73,7 +82,9 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
     ? lookupOilSpec(form.make, form.model, form.year)
     : null
 
-  const filterUrl = (form.make && form.model && form.year)
+  const isKnownEV = dbSpec !== null && dbSpec.oil === null
+
+  const filterUrl = (!isKnownEV && form.make && form.model && form.year)
     ? filterSearchUrl(form.year, form.make, form.model, form.engineType)
     : null
 
@@ -154,6 +165,13 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
         {/* Oil & Filter section — appears once year/make/model are selected */}
         {(form.make && form.model && form.year) && (
           <div className="oil-spec-section">
+            {isKnownEV && (
+              <div className="ev-notice">
+                <div className="oil-spec-section-title">Oil &amp; Filter</div>
+                <p className="ev-notice-text">Electric vehicle — no oil change required.</p>
+              </div>
+            )}
+            {!isKnownEV && (<>
             <div className="oil-spec-section-title">Oil &amp; Filter</div>
 
             <label>
@@ -210,6 +228,7 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
                 <span className="field-hint">Save once — shown every time you log an oil change</span>
               )}
             </label>
+            </>)}
           </div>
         )}
 
