@@ -71,7 +71,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
 
   const getOverdueItems = () => {
     const today = new Date()
-    return MAINTENANCE_ITEMS.filter(item => {
+    return visibleItems.filter(item => {
       // Mileage overdue
       const next = getNextMileage(item)
       if (next && currentMileage >= next) return true
@@ -136,12 +136,19 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
     setVoiceActive(false)
   }
 
+  const visibleItems = MAINTENANCE_ITEMS.filter(
+    item => !(prefs.hiddenServices ?? []).includes(item.id)
+  )
+
   const vehicleLabel = vehicle.nickname || `${vehicle.year} ${vehicle.make} ${vehicle.model}`
 
   return (
     <div className="vehicle-dashboard">
       <div className="page-header">
         <button className="back-btn" onClick={onBack}>←</button>
+        {vehicle.photoURL && (
+          <img className="header-vehicle-photo" src={vehicle.photoURL} alt="" />
+        )}
         <div className="header-title">
           <h2>{vehicleLabel}</h2>
           {vehicle.nickname && (
@@ -248,7 +255,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
             </svg>
             Log by Voice
           </button>
-          {MAINTENANCE_ITEMS.map(item => (
+          {visibleItems.map(item => (
             <MaintenanceCard
               key={item.id}
               item={item}

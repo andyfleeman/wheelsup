@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useUserPrefs } from '../contexts/UserPrefsContext'
 import { getUserProfile, saveUserProfile } from '../services/db'
 import { fromMiles, toMiles, distUnit } from '../utils/units'
+import { MAINTENANCE_ITEMS } from '../data/maintenanceItems'
 import './SettingsPage.css'
 
 export default function SettingsPage({ onBack }) {
@@ -158,6 +159,36 @@ export default function SettingsPage({ onBack }) {
                   >Metric</button>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="settings-section">
+            <div className="settings-section-title">Service Schedule</div>
+            <div className="settings-hint" style={{ paddingTop: '0.5rem' }}>Choose which services appear in your vehicle dashboard.</div>
+            <div className="settings-group">
+              {MAINTENANCE_ITEMS.map(item => {
+                const hidden = prefs.hiddenServices?.includes(item.id)
+                return (
+                  <div key={item.id} className="settings-row settings-row-toggle">
+                    <div>
+                      <span className="settings-row-label">{item.icon} {item.label}</span>
+                    </div>
+                    <button
+                      className={`settings-toggle${!hidden ? ' settings-toggle--on' : ''}`}
+                      onClick={() => {
+                        const current = prefs.hiddenServices ?? []
+                        const next = hidden
+                          ? current.filter(id => id !== item.id)
+                          : [...current, item.id]
+                        updatePref('hiddenServices', next)
+                      }}
+                      aria-pressed={!hidden}
+                    >
+                      <span className="settings-toggle-knob" />
+                    </button>
+                  </div>
+                )
+              })}
             </div>
           </div>
 

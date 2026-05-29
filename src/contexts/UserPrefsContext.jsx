@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback } from 'react'
 
-const DEFAULTS = { soundsEnabled: true, useMetric: false }
+const DEFAULTS = { soundsEnabled: true, useMetric: false, hiddenServices: [] }
 
 function loadPrefs() {
   try {
