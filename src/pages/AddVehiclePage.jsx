@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { MAKES, getModels, getYears } from '../data/vehicles.js'
 import { saveVehicle } from '../services/db'
-import { ENGINE_TYPES, getOilSpec } from '../data/maintenanceItems'
+import { ENGINE_TYPES } from '../data/maintenanceItems'
+import { lookupOilSpec, filterSearchUrl } from '../data/vehicleSpecs'
 import { playCarFlyby } from '../utils/sounds'
 import './AddVehiclePage.css'
 
@@ -13,13 +14,27 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
   const [form, setForm] = useState({
     make: '', model: '', year: '', engineType: '',
     currentMileage: '', dailyMiles: '', nickname: '',
+    oilWeight: '', filterPartNumber: '',
     ...(existing || {}),
   })
   const [saving, setSaving] = useState(false)
+  const [oilAutoFilled, setOilAutoFilled] = useState(false)
 
   const models = form.make ? getModels(form.make) : []
-  const oilSpec = form.make && form.engineType ? getOilSpec(form.make, form.engineType) : null
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }))
+
+  // Auto-populate oil weight from local OEM database when vehicle identity changes
+  useEffect(() => {
+    if (existing) return
+    if (!form.make || !form.model || !form.year) return
+    const spec = lookupOilSpec(form.make, form.model, form.year)
+    if (spec?.oil) {
+      setForm(f => ({ ...f, oilWeight: spec.oil }))
+      setOilAutoFilled(true)
+    } else {
+      setOilAutoFilled(false)
+    }
+  }, [form.make, form.model, form.year])
 
   const handleSubmit = async e => {
     e.preventDefault()
@@ -38,6 +53,14 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
       setSaving(false)
     }
   }
+
+  const dbSpec = (form.make && form.model && form.year)
+    ? lookupOilSpec(form.make, form.model, form.year)
+    : null
+
+  const filterUrl = (form.make && form.model && form.year)
+    ? filterSearchUrl(form.year, form.make, form.model, form.engineType)
+    : null
 
   return (
     <div className="add-vehicle-page">
@@ -89,14 +112,6 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
           </select>
         </label>
 
-        {oilSpec && (
-          <div className="oil-spec-hint">
-            <span className="oil-spec-label">Recommended Oil</span>
-            <span className="oil-spec-value">{oilSpec}</span>
-            <span className="oil-spec-note">Always verify with your owner's manual</span>
-          </div>
-        )}
-
         <label>
           Current Mileage *
           <input
@@ -120,6 +135,58 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
           />
           <span className="field-hint">Used to estimate your next service date</span>
         </label>
+
+        {/* Oil & Filter section — appears once year/make/model are selected */}
+        {(form.make && form.model && form.year) && (
+          <div className="oil-spec-section">
+            <div className="oil-spec-section-title">Oil &amp; Filter</div>
+
+            <label>
+              Oil Weight
+              <div className="oil-weight-row">
+                <input
+                  type="text"
+                  placeholder="e.g. 0W-20"
+                  value={form.oilWeight}
+                  onChange={e => { set('oilWeight', e.target.value); setOilAutoFilled(false) }}
+                  className="oil-weight-input"
+                />
+                {oilAutoFilled && <span className="auto-badge">Auto-filled</span>}
+              </div>
+              {dbSpec?.qt ? (
+                <span className="field-hint">
+                  {oilAutoFilled ? 'Looked up from OEM specs · ' : ''}Capacity: ~{dbSpec.qt} qt — verify with owner's manual
+                </span>
+              ) : (
+                <span className="field-hint">Check your oil cap or owner's manual</span>
+              )}
+            </label>
+
+            <label>
+              Filter Part #
+              <div className="filter-row">
+                <input
+                  type="text"
+                  placeholder="e.g. Fram PH2, Wix 51069"
+                  value={form.filterPartNumber}
+                  onChange={e => set('filterPartNumber', e.target.value)}
+                  className="filter-input"
+                />
+                {filterUrl && (
+                  <a
+                    href={filterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="filter-search-btn"
+                  >
+                    Find ↗
+                  </a>
+                )}
+              </div>
+              <span className="field-hint">Save once — shown every time you log an oil change</span>
+            </label>
+          </div>
+        )}
 
         <button type="submit" className="primary-btn" disabled={saving}>
           {saving ? 'Saving...' : existing ? 'Save Changes' : 'Add Vehicle'}

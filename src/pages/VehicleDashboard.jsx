@@ -146,6 +146,22 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
             <span className="mileage-tap">tap to update</span>
           </div>
         )}
+        {(vehicle.oilWeight || vehicle.filterPartNumber) && (
+          <div className="oil-spec-bar">
+            {vehicle.oilWeight && (
+              <span className="oil-spec-chip">
+                <span className="oil-spec-chip-label">Oil</span>
+                {vehicle.oilWeight}
+              </span>
+            )}
+            {vehicle.filterPartNumber && (
+              <span className="oil-spec-chip">
+                <span className="oil-spec-chip-label">Filter</span>
+                {vehicle.filterPartNumber}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {(() => {
@@ -220,6 +236,8 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
         <LogServiceModal
           item={logItem}
           currentMileage={currentMileage}
+          oilWeight={vehicle.oilWeight}
+          filterPartNumber={vehicle.filterPartNumber}
           onSave={handleLogService}
           onClose={() => setLogItem(null)}
           resetMode={false}
