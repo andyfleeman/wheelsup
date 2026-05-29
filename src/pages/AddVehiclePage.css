@@ -80,40 +80,86 @@
   border-color: #c62828;
 }
 
-.oil-spec-hint {
+/* ── Oil & Filter section ── */
+.oil-spec-section {
   background: white;
   border: 1.5px solid #e8e8e8;
   border-left: 4px solid #c62828;
   border-radius: 12px;
-  padding: 0.875rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.875rem;
 }
 
-.oil-spec-label {
-  font-size: 0.68rem;
+.oil-spec-section-title {
+  font-size: 0.65rem;
   font-weight: 800;
   color: #c62828;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
+  margin-bottom: -0.25rem;
 }
 
-.oil-spec-value {
-  font-size: 1rem;
+.oil-weight-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.oil-weight-input {
+  flex: 1;
+}
+
+.auto-badge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  background: rgba(46,125,50,0.1);
+  color: #2e7d32;
+  border: 1px solid rgba(46,125,50,0.2);
+  padding: 0.2rem 0.5rem;
+  border-radius: 100px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-input {
+  flex: 1;
+}
+
+.filter-search-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.875rem;
+  background: #1c1c1e;
+  color: white;
+  border-radius: 10px;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: #1a1a1a;
-  text-transform: none;
-  letter-spacing: normal;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  letter-spacing: 0.03em;
 }
 
-.oil-spec-note {
-  font-size: 0.75rem;
+.filter-search-btn:hover { background: #c62828; }
+
+/* Keep existing label styles applying inside the section too */
+.oil-spec-section label {
+  font-size: 0.72rem;
+  font-weight: 700;
   color: #aaa;
-  font-weight: 400;
-  font-style: italic;
-  text-transform: none;
-  letter-spacing: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .field-hint {

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { playBurnout } from '../utils/sounds'
 import './LogServiceModal.css'
 
-export default function LogServiceModal({ item, currentMileage, onSave, onClose, resetMode }) {
+export default function LogServiceModal({ item, currentMileage, oilWeight, filterPartNumber, onSave, onClose, resetMode }) {
   const [mileage, setMileage] = useState(currentMileage)
   const [notes, setNotes]     = useState('')
   const [cost, setCost]       = useState('')
@@ -42,6 +42,23 @@ export default function LogServiceModal({ item, currentMileage, onSave, onClose,
             <p className="reset-notice">Resets the interval clock from this mileage forward.</p>
           )}
         </div>
+
+        {item.id === 'oil_change' && !resetMode && (oilWeight || filterPartNumber) && (
+          <div className="oil-ref-bar">
+            {oilWeight && (
+              <span className="oil-ref-chip">
+                <span className="oil-ref-label">Oil</span>
+                {oilWeight}
+              </span>
+            )}
+            {filterPartNumber && (
+              <span className="oil-ref-chip">
+                <span className="oil-ref-label">Filter</span>
+                {filterPartNumber}
+              </span>
+            )}
+          </div>
+        )}
 
         <label className="modal-label">
           <span>Mileage at service</span>
