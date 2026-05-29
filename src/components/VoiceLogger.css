@@ -109,12 +109,29 @@
 }
 
 /* ── Listening status ── */
-.vl-waveform {
-  display: block;
-  width: 280px;
-  max-width: 100%;
-  height: 56px;
-  margin: 0.25rem auto 0;
+.vl-waveform-bars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 52px;
+  margin: 0.25rem 0 0;
+}
+
+.vl-waveform-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: #c62828;
+  height: 100%;
+  transform: scaleY(0.12);
+  transform-origin: center;
+  animation: vl-bar 1.1s ease-in-out infinite alternate;
+  opacity: 0.85;
+}
+
+@keyframes vl-bar {
+  0%   { transform: scaleY(0.12); }
+  100% { transform: scaleY(1); }
 }
 
 .vl-status {

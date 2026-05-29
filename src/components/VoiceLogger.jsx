@@ -35,6 +35,17 @@ function CheckIcon() {
   )
 }
 
+// ── Animated waveform bars (CSS — no mic stream needed) ────────────────────
+function WaveformBars() {
+  return (
+    <div className="vl-waveform-bars" aria-hidden="true">
+      {[...Array(28)].map((_, i) => (
+        <span key={i} className="vl-waveform-bar" style={{ animationDelay: `${(i * 0.06).toFixed(2)}s` }} />
+      ))}
+    </div>
+  )
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────
 function formatMileageDisplay(miles, useMetric) {
   if (miles == null) return null
@@ -75,107 +86,35 @@ const STATE = {
   ERROR:      'error',
 }
 
-const BAR_COUNT = 40
-
 // ── Component ─────────────────────────────────────────────────────────────
 export default function VoiceLogger({ active, onConfirm, onClose, currentMileage, useMetric }) {
   const [uiState,  setUiState]  = useState(STATE.IDLE)
   const [errorMsg, setErrorMsg] = useState('')
   const [parsed,   setParsed]   = useState(null)
 
-  const recognitionRef = useRef(null)
-  const listenTimerRef = useRef(null)
-  const streamRef      = useRef(null)
-  const audioCtxRef    = useRef(null)
-  const analyserRef    = useRef(null)
-  const canvasRef      = useRef(null)
-  const animFrameRef   = useRef(null)
+  const recognitionRef  = useRef(null)
+  const listenTimerRef  = useRef(null)
 
   // Reset when panel hidden
   useEffect(() => {
     if (!active) {
-      stopAll()
+      stopRecognition()
       setUiState(STATE.IDLE)
       setErrorMsg('')
       setParsed(null)
     }
   }, [active])
 
-  // Start waveform animation once canvas is in the DOM (after LISTENING render)
-  useEffect(() => {
-    if (uiState === STATE.LISTENING) {
-      drawWaveform()
-    }
-    return () => cancelAnimationFrame(animFrameRef.current)
-  }, [uiState])
-
-  // ── Cleanup helpers ──────────────────────────────────────────────────────
-  function stopAll() {
+  function stopRecognition() {
     clearTimeout(listenTimerRef.current)
-    cancelAnimationFrame(animFrameRef.current)
-
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop() } catch (_) {}
+      try { recognitionRef.current.abort() } catch (_) {}
       recognitionRef.current = null
     }
-    if (audioCtxRef.current) {
-      audioCtxRef.current.close().catch(() => {})
-      audioCtxRef.current = null
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop())
-      streamRef.current = null
-    }
-    analyserRef.current = null
-  }
-
-  // ── Waveform drawing ─────────────────────────────────────────────────────
-  function drawWaveform() {
-    const canvas   = canvasRef.current
-    const analyser = analyserRef.current
-    if (!canvas) return
-
-    const bufferLen = analyser ? analyser.frequencyBinCount : BAR_COUNT
-    const dataArray = new Uint8Array(bufferLen)
-
-    function draw() {
-      animFrameRef.current = requestAnimationFrame(draw)
-      if (analyser) analyser.getByteFrequencyData(dataArray)
-
-      const ctx = canvas.getContext('2d')
-      const W   = canvas.width
-      const H   = canvas.height
-      const gap = 3
-      const barW = (W - gap * (BAR_COUNT - 1)) / BAR_COUNT
-
-      ctx.clearRect(0, 0, W, H)
-
-      for (let i = 0; i < BAR_COUNT; i++) {
-        let val
-        if (analyser) {
-          const idx = Math.floor((i / BAR_COUNT) * (bufferLen / 2))
-          val = dataArray[idx] / 255
-        } else {
-          // No analyser — gentle idle animation so it doesn't look dead
-          val = 0.08 + 0.07 * Math.sin(Date.now() / 200 + i * 0.4)
-        }
-
-        const barH = Math.max(4, val * H * 0.88)
-        const x    = i * (barW + gap)
-        const y    = (H - barH) / 2
-
-        const distFromCenter = Math.abs(i - BAR_COUNT / 2) / (BAR_COUNT / 2)
-        const alpha = Math.max(0.2, 1 - distFromCenter * 0.55)
-        ctx.fillStyle = `rgba(198,40,40,${alpha.toFixed(2)})`
-        ctx.fillRect(x, y, barW, barH)
-      }
-    }
-
-    draw()
   }
 
   // ── Start listening ──────────────────────────────────────────────────────
-  async function handleMicPress() {
+  function handleMicPress() {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY
     if (!apiKey) {
       setErrorMsg('Voice logging requires a Gemini API key')
@@ -190,44 +129,19 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
       return
     }
 
-    // Get mic stream — keep it alive during recognition so iOS doesn't abort
-    let stream
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-      streamRef.current = stream
-    } catch (err) {
-      setErrorMsg('Microphone access denied. Please allow mic access in Settings.')
-      setUiState(STATE.ERROR)
-      return
-    }
-
-    // Wire up Web Audio analyser for waveform (non-fatal if unavailable)
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext
-      const audioCtx = new AudioCtx()
-      if (audioCtx.state === 'suspended') await audioCtx.resume()
-      audioCtxRef.current = audioCtx
-
-      const analyser = audioCtx.createAnalyser()
-      analyser.fftSize = 128
-      analyserRef.current = analyser
-
-      audioCtx.createMediaStreamSource(stream).connect(analyser)
-    } catch (_) {
-      // Visualizer unavailable — recognition still works
-    }
+    // Clean up any previous session before starting a fresh one
+    stopRecognition()
 
     const recognition = new SpeechRecognition()
-    recognition.lang           = 'en-US'
-    recognition.interimResults = false
+    recognition.lang            = 'en-US'
+    recognition.interimResults  = false
     recognition.maxAlternatives = 1
     recognitionRef.current = recognition
 
     recognition.onstart = () => {
       setUiState(STATE.LISTENING)
-      // 10s hard timeout in case onend never fires
       listenTimerRef.current = setTimeout(() => {
-        stopAll()
+        stopRecognition()
         setErrorMsg("We didn't hear anything. Try again.")
         setUiState(STATE.ERROR)
       }, 10000)
@@ -235,16 +149,14 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
 
     recognition.onresult = (event) => {
       clearTimeout(listenTimerRef.current)
-      cancelAnimationFrame(animFrameRef.current)
-      // Stop audio resources — mic no longer needed
-      if (audioCtxRef.current) { audioCtxRef.current.close().catch(() => {}); audioCtxRef.current = null }
-      if (streamRef.current)   { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null }
+      recognitionRef.current = null
       const transcript = event.results[0][0].transcript
       handleTranscript(transcript)
     }
 
     recognition.onerror = (event) => {
-      stopAll()
+      clearTimeout(listenTimerRef.current)
+      recognitionRef.current = null
       if (event.error === 'no-speech' || event.error === 'audio-capture') {
         setErrorMsg("We didn't hear anything. Try again.")
       } else if (event.error === 'not-allowed') {
@@ -256,8 +168,8 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
     }
 
     recognition.onend = () => {
-      stopAll()
-      // Stale-closure-safe: use functional updater to read current state
+      clearTimeout(listenTimerRef.current)
+      recognitionRef.current = null
       setUiState(prev => {
         if (prev === STATE.LISTENING) {
           setErrorMsg("We didn't hear anything. Try again.")
@@ -296,7 +208,6 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
 
       if (!rawText) throw new Error('Empty response from Gemini')
 
-      // Strip markdown code fences if present
       const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
       const result  = JSON.parse(cleaned)
 
@@ -324,7 +235,7 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
   }
 
   function reset() {
-    stopAll()
+    stopRecognition()
     setUiState(STATE.IDLE)
     setErrorMsg('')
     setParsed(null)
@@ -339,7 +250,6 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
 
   const mileageDisplay = parsed ? formatMileageDisplay(parsed.mileage, useMetric) : null
 
-  // ── UI ───────────────────────────────────────────────────────────────────
   return (
     <div className="vl-overlay" onClick={handleClose}>
       <div className="vl-sheet" onClick={e => e.stopPropagation()}>
@@ -359,13 +269,7 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
 
             {uiState === STATE.LISTENING && (
               <>
-                <canvas
-                  ref={canvasRef}
-                  className="vl-waveform"
-                  width={280}
-                  height={56}
-                  aria-hidden="true"
-                />
+                <WaveformBars />
                 <div className="vl-status">
                   <span className="vl-status-dot" />
                   Listening…
