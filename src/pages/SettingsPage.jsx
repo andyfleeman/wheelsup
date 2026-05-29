@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useUserPrefs } from '../contexts/UserPrefsContext'
 import { getUserProfile, saveUserProfile } from '../services/db'
+import { fromMiles, toMiles, distUnit } from '../utils/units'
 import './SettingsPage.css'
 
 export default function SettingsPage({ onBack }) {
@@ -17,7 +18,7 @@ export default function SettingsPage({ onBack }) {
   useEffect(() => {
     getUserProfile(user.uid).then(p => {
       setDisplayName(p.displayName || '')
-      setDefaultOilInterval(p.defaultOilInterval || '')
+      setDefaultOilInterval(p.defaultOilInterval ? fromMiles(p.defaultOilInterval, prefs.useMetric) : '')
       setAlertDays(p.alertDays || '')
       setLoading(false)
     })
@@ -27,7 +28,7 @@ export default function SettingsPage({ onBack }) {
     setSaving(true)
     await saveUserProfile(user.uid, {
       displayName:        displayName.trim() || null,
-      defaultOilInterval: defaultOilInterval ? Number(defaultOilInterval) : null,
+      defaultOilInterval: defaultOilInterval ? toMiles(Number(defaultOilInterval), prefs.useMetric) : null,
       alertDays:          alertDays ? Number(alertDays) : null,
     })
     setSaving(false)
@@ -84,10 +85,10 @@ export default function SettingsPage({ onBack }) {
                     min="500"
                     step="500"
                   />
-                  <span className="settings-unit">mi</span>
+                  <span className="settings-unit">{distUnit(prefs.useMetric)}</span>
                 </div>
               </label>
-              <div className="settings-hint">Your preferred oil change frequency. App default is 5,000 mi.</div>
+              <div className="settings-hint">Your preferred oil change frequency. App default is {prefs.useMetric ? '8,000 km' : '5,000 mi'}.</div>
 
               <label className="settings-row">
                 <span className="settings-row-label">Alert Window</span>

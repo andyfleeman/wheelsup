@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useUserPrefs } from '../contexts/UserPrefsContext'
+import { fmtDist, fromMiles, toMiles } from '../utils/units'
 import { MAINTENANCE_ITEMS } from '../data/maintenanceItems'
 import { saveMaintenanceRecord, getMaintenanceRecords, deleteMaintenanceRecord, saveInterval, getIntervals, saveVehicle } from '../services/db'
 import MaintenanceCard from '../components/MaintenanceCard'
@@ -9,6 +11,7 @@ import './VehicleDashboard.css'
 
 export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   const { user } = useAuth()
+  const { prefs } = useUserPrefs()
   const [records, setRecords]           = useState([])
   const [intervals, setIntervals]       = useState({})
   const [currentMileage, setCurrentMileage] = useState(vehicle.currentMileage)
@@ -82,7 +85,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   }
 
   const handleUpdateMileage = async () => {
-    const val = Number(mileageInput)
+    const val = toMiles(mileageInput, prefs.useMetric)
     if (!val || val < 0) return
     setCurrentMileage(val)
     setEditingMileage(false)
@@ -140,9 +143,9 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
             <button onClick={() => setEditingMileage(false)}>Cancel</button>
           </div>
         ) : (
-          <div className="mileage-display" onClick={() => { setMileageInput(currentMileage); setEditingMileage(true) }}>
-            <span className="mileage-label">Current Mileage</span>
-            <span className="mileage-value">{currentMileage.toLocaleString()} mi</span>
+          <div className="mileage-display" onClick={() => { setMileageInput(fromMiles(currentMileage, prefs.useMetric)); setEditingMileage(true) }}>
+            <span className="mileage-label">Current {prefs.useMetric ? 'Kilometers' : 'Mileage'}</span>
+            <span className="mileage-value">{fmtDist(currentMileage, prefs.useMetric)}</span>
             <span className="mileage-tap">tap to update</span>
           </div>
         )}
@@ -184,7 +187,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
                   >
                     <span>{item.label}</span>
                     <span className="overdue-detail">
-                      {milesOver > 0 ? `${milesOver.toLocaleString()} mi overdue` : 'time limit reached'} · Log now →
+                      {milesOver > 0 ? `${fmtDist(milesOver, prefs.useMetric)} overdue` : 'time limit reached'} · Log now →
                     </span>
                   </button>
                 )
@@ -220,6 +223,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
               currentMileage={currentMileage}
               intervalMiles={getInterval(item)}
               dueInfo={getDueInfo(item)}
+              useMetric={prefs.useMetric}
               onIntervalChange={(miles) => handleIntervalChange(item.id, miles)}
               onLog={() => setLogItem(item)}
               onReset={item.resetAction ? () => setResetItem(item) : undefined}
@@ -238,6 +242,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
           currentMileage={currentMileage}
           oilWeight={vehicle.oilWeight}
           filterPartNumber={vehicle.filterPartNumber}
+          useMetric={prefs.useMetric}
           onSave={handleLogService}
           onClose={() => setLogItem(null)}
           resetMode={false}
@@ -248,6 +253,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
         <LogServiceModal
           item={resetItem}
           currentMileage={currentMileage}
+          useMetric={prefs.useMetric}
           onSave={handleLogService}
           onClose={() => setResetItem(null)}
           resetMode={true}

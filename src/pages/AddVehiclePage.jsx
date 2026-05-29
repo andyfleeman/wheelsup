@@ -6,6 +6,7 @@ import { saveVehicle } from '../services/db'
 import { ENGINE_TYPES } from '../data/maintenanceItems'
 import { lookupOilSpec, filterSearchUrl, getEngineOptions } from '../data/vehicleSpecs'
 import { playCarFlyby } from '../utils/sounds'
+import { fromMiles, toMiles, distUnit } from '../utils/units'
 import './AddVehiclePage.css'
 
 const YEARS = getYears()
@@ -19,11 +20,17 @@ function fmtVolume(qt, useMetric) {
 export default function AddVehiclePage({ onSaved, onCancel, existing }) {
   const { user } = useAuth()
   const { prefs } = useUserPrefs()
-  const [form, setForm] = useState({
-    make: '', model: '', year: '', engineType: '',
-    currentMileage: '', dailyMiles: '', nickname: '',
-    oilWeight: '', filterPartNumber: '',
-    ...(existing || {}),
+  const [form, setForm] = useState(() => {
+    const base = { make: '', model: '', year: '', engineType: '',
+      currentMileage: '', dailyMiles: '', nickname: '',
+      oilWeight: '', filterPartNumber: '' }
+    if (!existing) return base
+    return {
+      ...base,
+      ...existing,
+      currentMileage: fromMiles(existing.currentMileage, prefs.useMetric) || '',
+      dailyMiles:     fromMiles(existing.dailyMiles, prefs.useMetric) || '',
+    }
   })
   const [saving, setSaving] = useState(false)
   const [oilAutoFilled, setOilAutoFilled] = useState(false)
@@ -78,8 +85,8 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
     try {
       await saveVehicle(user.uid, {
         ...form,
-        currentMileage: Number(form.currentMileage),
-        dailyMiles: form.dailyMiles ? Number(form.dailyMiles) : null,
+        currentMileage: toMiles(form.currentMileage, prefs.useMetric),
+        dailyMiles: form.dailyMiles ? toMiles(form.dailyMiles, prefs.useMetric) : null,
         year: Number(form.year),
       })
       if (!existing) playCarFlyby()
@@ -152,10 +159,10 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
         )}
 
         <label>
-          Current Mileage *
+          Current {prefs.useMetric ? 'Kilometers' : 'Mileage'} *
           <input
             type="number"
-            placeholder="e.g. 150000"
+            placeholder={prefs.useMetric ? 'e.g. 241000' : 'e.g. 150000'}
             value={form.currentMileage}
             onChange={e => set('currentMileage', e.target.value)}
             min="0"
@@ -164,10 +171,10 @@ export default function AddVehiclePage({ onSaved, onCancel, existing }) {
         </label>
 
         <label>
-          Average Daily Miles
+          Average Daily {prefs.useMetric ? 'KM' : 'Miles'}
           <input
             type="number"
-            placeholder="e.g. 62"
+            placeholder={prefs.useMetric ? 'e.g. 100' : 'e.g. 62'}
             value={form.dailyMiles}
             onChange={e => set('dailyMiles', e.target.value)}
             min="1"

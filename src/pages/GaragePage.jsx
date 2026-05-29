@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useUserPrefs } from '../contexts/UserPrefsContext'
 import { getVehicles, deleteVehicle, getUserProfile } from '../services/db'
+import { fmtDist } from '../utils/units'
 import './GaragePage.css'
 
 export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }) {
   const { user } = useAuth()
+  const { prefs } = useUserPrefs()
   const [vehicles, setVehicles] = useState([])
   const [profile, setProfile] = useState({})
   const [loading, setLoading] = useState(true)
@@ -67,7 +70,7 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }
                     <div className="vehicle-sub">{v.year} {v.make} {v.model}</div>
                   )}
                   <div className="vehicle-meta">
-                    <span className="vehicle-mileage-chip">{v.currentMileage?.toLocaleString()} mi</span>
+                    <span className="vehicle-mileage-chip">{fmtDist(v.currentMileage, prefs.useMetric)}</span>
                     {v.engineType && <span className="vehicle-engine-chip">{v.engineType}</span>}
                   </div>
                 </div>
