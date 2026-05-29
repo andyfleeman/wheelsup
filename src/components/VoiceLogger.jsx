@@ -200,7 +200,7 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
 
     } catch (err) {
       console.error('[VoiceLogger] Gemini error:', err)
-      setErrorMsg("Couldn't parse that. Try again.")
+      setErrorMsg(err?.message || "Couldn't parse that. Try again.")
       setUiState(STATE.ERROR)
     }
   }
