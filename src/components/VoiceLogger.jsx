@@ -104,7 +104,7 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
   }
 
   // ── Start listening ──────────────────────────────────────────────────────
-  function handleMicPress() {
+  async function handleMicPress() {
     // Guard: API key
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY
     if (!apiKey) {
@@ -126,6 +126,16 @@ export default function VoiceLogger({ active, onConfirm, onClose, currentMileage
     recognition.interimResults = false
     recognition.maxAlternatives = 1
     recognitionRef.current = recognition
+
+    // Pre-request mic permission — without this iOS PWA aborts immediately
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      stream.getTracks().forEach(t => t.stop())
+    } catch (err) {
+      setErrorMsg('Microphone access denied. Please allow mic access in Settings.')
+      setUiState(STATE.ERROR)
+      return
+    }
 
     recognition.onstart = () => {
       setUiState(STATE.LISTENING)
