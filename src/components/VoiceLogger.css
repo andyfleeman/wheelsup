@@ -109,6 +109,14 @@
 }
 
 /* ── Listening status ── */
+.vl-waveform {
+  display: block;
+  width: 280px;
+  max-width: 100%;
+  height: 56px;
+  margin: 0.25rem auto 0;
+}
+
 .vl-status {
   font-size: 0.8rem;
   font-weight: 700;
