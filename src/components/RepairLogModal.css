@@ -1,0 +1,9 @@
+.repair-modal-sheet {
+  /* inherits modal-sheet styles from LogServiceModal.css */
+}
+
+.repair-modal-sub {
+  font-size: 0.82rem;
+  color: #888;
+  margin: 0.15rem 0 0;
+}

@@ -54,6 +54,28 @@ export async function getMaintenanceRecords(uid, vehicleId) {
   return snap.docs.map(d => ({ ...d.data(), id: d.id }))
 }
 
+// --- Fuel Records ---
+export async function saveFuelRecord(uid, vehicleId, record) {
+  const ref = record.id
+    ? doc(db, 'users', uid, 'vehicles', vehicleId, 'fuel', record.id)
+    : doc(collection(db, 'users', uid, 'vehicles', vehicleId, 'fuel'))
+  await setDoc(ref, { ...record, id: ref.id, createdAt: serverTimestamp() }, { merge: true })
+  return ref.id
+}
+
+export async function getFuelRecords(uid, vehicleId) {
+  const q = query(
+    collection(db, 'users', uid, 'vehicles', vehicleId, 'fuel'),
+    orderBy('mileage', 'desc')
+  )
+  const snap = await getDocs(q)
+  return snap.docs.map(d => ({ ...d.data(), id: d.id }))
+}
+
+export async function deleteFuelRecord(uid, vehicleId, recordId) {
+  await deleteDoc(doc(db, 'users', uid, 'vehicles', vehicleId, 'fuel', recordId))
+}
+
 // --- Maintenance Intervals (per vehicle, per item) ---
 export async function saveInterval(uid, vehicleId, itemId, interval) {
   const ref = doc(db, 'users', uid, 'vehicles', vehicleId, 'intervals', itemId)

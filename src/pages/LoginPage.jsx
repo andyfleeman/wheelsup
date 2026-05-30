@@ -1,6 +1,12 @@
 import { useAuth } from '../contexts/AuthContext'
 import './LoginPage.css'
 
+const FEATURES = [
+  { icon: '🗣️', text: 'Say it, we log it' },
+  { icon: '📅', text: 'Smart reminders before anything is due' },
+  { icon: '🔧', text: 'OEM specs for 300+ models, built in' },
+]
+
 export default function LoginPage() {
   const { login } = useAuth()
 
@@ -22,7 +28,16 @@ export default function LoginPage() {
           </svg>
         </div>
         <h1 className="login-wordmark">Klyp</h1>
-        <p className="login-tagline">Your garage. Never miss a service.</p>
+        <p className="login-tagline">The maintenance log you'll actually keep.</p>
+
+        <div className="login-features">
+          {FEATURES.map(f => (
+            <div key={f.text} className="login-feature">
+              <span className="login-feature-icon">{f.icon}</span>
+              <span className="login-feature-text">{f.text}</span>
+            </div>
+          ))}
+        </div>
 
         <button className="google-btn" onClick={login}>
           <svg width="20" height="20" viewBox="0 0 48 48" className="google-icon">

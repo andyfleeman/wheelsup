@@ -197,10 +197,15 @@ export default function SettingsPage({ onBack }) {
               <div className="settings-section-title">Notifications</div>
               <div className="settings-group">
                 {notifPermission === 'granted' ? (
-                  <div className="settings-row">
-                    <span className="settings-row-label">Service Reminders</span>
-                    <span className="notif-status notif-status--on">Enabled</span>
-                  </div>
+                  <>
+                    <div className="settings-row">
+                      <span className="settings-row-label">Service Reminders</span>
+                      <span className="notif-status notif-status--on">Active</span>
+                    </div>
+                    <div className="settings-hint">
+                      You'll get a heads-up before services are due — with exact miles and days remaining. Klyp checks each time you open the app.
+                    </div>
+                  </>
                 ) : notifPermission === 'denied' ? (
                   <>
                     <div className="settings-row">
@@ -208,7 +213,7 @@ export default function SettingsPage({ onBack }) {
                       <span className="notif-status notif-status--off">Blocked</span>
                     </div>
                     <div className="settings-hint">
-                      Notifications are blocked. To enable: open your device&rsquo;s Settings → Browser/App → Notifications and allow Klyp.
+                      Notifications are blocked in your browser. To enable: go to your device&rsquo;s Settings → Browser → Notifications and allow Klyp.
                     </div>
                   </>
                 ) : (
@@ -219,7 +224,9 @@ export default function SettingsPage({ onBack }) {
                         Enable
                       </button>
                     </div>
-                    <div className="settings-hint">Get reminded when oil changes and other services are coming due.</div>
+                    <div className="settings-hint">
+                      Get a smart alert like "Oil change due in ~340 miles — about 12 days from now." Never be caught off guard.
+                    </div>
                   </>
                 )}
               </div>
@@ -253,8 +260,8 @@ export default function SettingsPage({ onBack }) {
               </svg>
               <span className="settings-about-name">Klyp</span>
             </div>
-            <div className="settings-about-tagline">Your garage. Never miss a service.</div>
-            <div className="settings-about-version">v1.0 · Vehicle Maintenance Tracker</div>
+            <div className="settings-about-tagline">The maintenance log you'll actually keep.</div>
+            <div className="settings-about-version">v1.1 · Vehicle Maintenance Tracker</div>
           </div>
 
         </div>

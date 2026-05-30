@@ -87,6 +87,35 @@
   flex-shrink: 0;
 }
 
+.login-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.login-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+}
+
+.login-feature-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.login-feature-text {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.55);
+  font-weight: 500;
+}
+
 .login-footer {
   margin-top: 1.75rem;
   font-size: 0.75rem;
