@@ -215,9 +215,27 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
         <button className="edit-vehicle-btn" onClick={onEdit} title="Edit vehicle">Edit</button>
       </div>
 
-      <div className="mileage-banner">
+      <div className="vehicle-strip">
+        <div className="vehicle-strip-left">
+          {(vehicle.oilWeight || vehicle.filterPartNumber) && (
+            <>
+              {vehicle.oilWeight && (
+                <span className="oil-spec-chip">
+                  <span className="oil-spec-chip-label">Oil</span>
+                  {vehicle.oilWeight}
+                </span>
+              )}
+              {vehicle.filterPartNumber && (
+                <span className="oil-spec-chip">
+                  <span className="oil-spec-chip-label">Filter</span>
+                  {vehicle.filterPartNumber}
+                </span>
+              )}
+            </>
+          )}
+        </div>
         {editingMileage ? (
-          <div className="mileage-edit">
+          <div className="mileage-edit-inline">
             <input
               type="number"
               value={mileageInput}
@@ -225,30 +243,17 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
               autoFocus
             />
             <button onClick={handleUpdateMileage}>Save</button>
-            <button onClick={() => setEditingMileage(false)}>Cancel</button>
+            <button onClick={() => setEditingMileage(false)}>✕</button>
           </div>
         ) : (
-          <div className="mileage-display" onClick={() => { setMileageInput(fromMiles(currentMileage, prefs.useMetric)); setEditingMileage(true) }}>
-            <span className="mileage-label">Current {prefs.useMetric ? 'Kilometers' : 'Mileage'}</span>
-            <span className="mileage-value">{fmtDist(currentMileage, prefs.useMetric)}</span>
-            <span className="mileage-tap">tap to update</span>
-          </div>
-        )}
-        {(vehicle.oilWeight || vehicle.filterPartNumber) && (
-          <div className="oil-spec-bar">
-            {vehicle.oilWeight && (
-              <span className="oil-spec-chip">
-                <span className="oil-spec-chip-label">Oil</span>
-                {vehicle.oilWeight}
-              </span>
-            )}
-            {vehicle.filterPartNumber && (
-              <span className="oil-spec-chip">
-                <span className="oil-spec-chip-label">Filter</span>
-                {vehicle.filterPartNumber}
-              </span>
-            )}
-          </div>
+          <button
+            className="mileage-chip"
+            onClick={() => { setMileageInput(fromMiles(currentMileage, prefs.useMetric)); setEditingMileage(true) }}
+          >
+            <span className="mileage-chip-label">{prefs.useMetric ? 'KM' : 'MI'}</span>
+            <span className="mileage-chip-value">{fmtDist(currentMileage, prefs.useMetric)}</span>
+            <span className="mileage-chip-edit">✎</span>
+          </button>
         )}
       </div>
 

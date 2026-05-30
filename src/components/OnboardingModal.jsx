@@ -58,7 +58,7 @@ export default function OnboardingModal({ onDone }) {
 
         {current.showLogo && (
           <div className="onboarding-logo-wrap">
-            <img src="/wheelsup/icon-192.png" className="onboarding-logo-img" alt="Klyp" />
+            <img src="/wheelsup/logo-mark.png" className="onboarding-logo-img" alt="Klyp" />
             <span className="onboarding-wordmark">Klyp</span>
           </div>
         )}

@@ -302,10 +302,9 @@
 }
 
 .settings-about-logo-img {
-  width: 26px;
-  height: 26px;
+  height: 24px;
+  width: auto;
   object-fit: contain;
-  border-radius: 6px;
 }
 
 .settings-about-name {

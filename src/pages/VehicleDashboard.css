@@ -81,116 +81,116 @@
   color: white;
 }
 
-/* ── Mileage banner ── */
-.mileage-banner {
+/* ── Compact vehicle strip (replaces tall mileage banner) ── */
+.vehicle-strip {
   background: #2c2c2e;
-  color: white;
-  padding: 1.5rem 1rem 1.25rem;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
-.oil-spec-bar {
+.vehicle-strip-left {
   display: flex;
-  justify-content: center;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  padding-top: 0.875rem;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .oil-spec-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 100px;
-  padding: 0.3rem 0.75rem;
-  font-size: 0.78rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: rgba(255,255,255,0.85);
 }
 
 .oil-spec-chip-label {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 800;
   color: #1565c0;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
-.mileage-display {
+.mileage-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(21,101,192,0.18);
+  border: 1px solid rgba(21,101,192,0.4);
+  border-radius: 100px;
+  padding: 0.3rem 0.7rem;
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
+  color: white;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
 }
 
-.mileage-label {
-  font-size: 0.65rem;
-  opacity: 0.4;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
+.mileage-chip:hover { background: rgba(21,101,192,0.28); }
 
-.mileage-value {
-  font-size: 2.75rem;
+.mileage-chip-label {
+  font-size: 0.55rem;
   font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.03em;
-}
-
-.mileage-tap {
-  font-size: 0.65rem;
-  opacity: 0.3;
-  margin-top: 0.3rem;
+  color: #64b5f6;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
 }
 
-.mileage-edit {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: center;
-}
-
-.mileage-edit input {
-  padding: 0.6rem 0.875rem;
-  border-radius: 10px;
-  border: none;
-  font-size: 1.25rem;
+.mileage-chip-value {
+  font-size: 0.82rem;
   font-weight: 700;
-  width: 150px;
+  letter-spacing: -0.01em;
+}
+
+.mileage-chip-edit {
+  font-size: 0.7rem;
+  opacity: 0.45;
+}
+
+.mileage-edit-inline {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.mileage-edit-inline input {
+  padding: 0.3rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  width: 110px;
   text-align: center;
   background: rgba(255,255,255,0.1);
   color: white;
   outline: none;
 }
 
-.mileage-edit input:focus {
-  background: rgba(255,255,255,0.15);
-}
-
-.mileage-edit button {
-  padding: 0.6rem 1rem;
-  border-radius: 10px;
+.mileage-edit-inline button {
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
   border: none;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
-  letter-spacing: 0.03em;
-  transition: opacity 0.15s;
 }
 
-.mileage-edit button:first-of-type {
+.mileage-edit-inline button:first-of-type {
   background: #1565c0;
   color: white;
 }
 
-.mileage-edit button:last-of-type {
+.mileage-edit-inline button:last-of-type {
   background: rgba(255,255,255,0.1);
   color: rgba(255,255,255,0.6);
 }

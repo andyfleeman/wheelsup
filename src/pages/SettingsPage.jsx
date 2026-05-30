@@ -252,7 +252,7 @@ export default function SettingsPage({ onBack }) {
 
           <div className="settings-about">
             <div className="settings-about-logo">
-              <img src="/wheelsup/icon-192.png" className="settings-about-logo-img" alt="Klyp" />
+              <img src="/wheelsup/logo-mark.png" className="settings-about-logo-img" alt="Klyp" />
               <span className="settings-about-name">Klyp</span>
             </div>
             <div className="settings-about-tagline">The maintenance log you'll actually keep.</div>

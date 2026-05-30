@@ -1,3 +1,37 @@
+.fuel-quick-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.fuel-quick-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1.5px solid #1565c0;
+  background: rgba(21,101,192,0.08);
+  color: #1565c0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.fuel-quick-btn:hover:not(:disabled) { background: rgba(21,101,192,0.16); }
+.fuel-quick-btn:disabled { opacity: 0.45; cursor: default; }
+.fuel-quick-btn--active { background: rgba(21,101,192,0.22); }
+
+.fuel-scan-msg {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #1565c0;
+  font-weight: 600;
+}
+
 .fuel-amount-wrap {
   display: flex;
   align-items: center;

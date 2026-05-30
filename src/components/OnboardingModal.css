@@ -64,10 +64,9 @@
 }
 
 .onboarding-logo-img {
-  width: 40px;
-  height: 40px;
+  height: 36px;
+  width: auto;
   object-fit: contain;
-  border-radius: 9px;
 }
 
 .onboarding-wordmark {
