@@ -3,32 +3,67 @@ import { useAuth } from '../contexts/AuthContext'
 import { useUserPrefs } from '../contexts/UserPrefsContext'
 import { fmtDist, fromMiles, toMiles } from '../utils/units'
 import { MAINTENANCE_ITEMS } from '../data/maintenanceItems'
-import { saveMaintenanceRecord, getMaintenanceRecords, deleteMaintenanceRecord, saveInterval, getIntervals, saveVehicle } from '../services/db'
+import {
+  saveMaintenanceRecord, getMaintenanceRecords, deleteMaintenanceRecord,
+  saveInterval, getIntervals, saveVehicle,
+  saveFuelRecord, getFuelRecords, deleteFuelRecord,
+} from '../services/db'
+import { checkAndScheduleNotifications, clearServiceNotifications } from '../utils/notifications'
 import MaintenanceCard from '../components/MaintenanceCard'
 import LogServiceModal from '../components/LogServiceModal'
+import RepairLogModal from '../components/RepairLogModal'
+import FuelLogModal from '../components/FuelLogModal'
 import VoiceLogger from '../components/VoiceLogger'
 import LogbookPage from './LogbookPage'
+import FuelTab from './FuelTab'
 import './VehicleDashboard.css'
 
 export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   const { user } = useAuth()
   const { prefs } = useUserPrefs()
-  const [records, setRecords]           = useState([])
-  const [intervals, setIntervals]       = useState({})
+  const [records, setRecords]               = useState([])
+  const [intervals, setIntervals]           = useState({})
+  const [fuelRecords, setFuelRecords]       = useState([])
   const [currentMileage, setCurrentMileage] = useState(vehicle.currentMileage)
   const [editingMileage, setEditingMileage] = useState(false)
-  const [mileageInput, setMileageInput] = useState(vehicle.currentMileage)
-  const [logItem, setLogItem]           = useState(null)
-  const [resetItem, setResetItem]       = useState(null)
-  const [voiceActive, setVoiceActive]   = useState(false)
-  const [tab, setTab]                   = useState('schedule') // 'schedule' | 'logbook'
+  const [mileageInput, setMileageInput]     = useState(vehicle.currentMileage)
+  const [logItem, setLogItem]               = useState(null)
+  const [resetItem, setResetItem]           = useState(null)
+  const [showRepairModal, setShowRepairModal] = useState(false)
+  const [showFuelModal, setShowFuelModal]   = useState(false)
+  const [voiceActive, setVoiceActive]       = useState(false)
+  const [tab, setTab]                       = useState('schedule')
 
   useEffect(() => {
-    getMaintenanceRecords(user.uid, vehicle.id).then(setRecords)
-    getIntervals(user.uid, vehicle.id).then(setIntervals)
+    Promise.all([
+      getMaintenanceRecords(user.uid, vehicle.id),
+      getIntervals(user.uid, vehicle.id),
+    ]).then(([recs, ivs]) => {
+      setRecords(recs)
+      setIntervals(ivs)
+    })
   }, [user.uid, vehicle.id])
 
-  const getLastRecord = (itemId) => records.find(r => r.itemId === itemId)
+  // Load fuel records lazily when fuel tab is first opened
+  useEffect(() => {
+    if (tab === 'fuel' && fuelRecords.length === 0) {
+      getFuelRecords(user.uid, vehicle.id).then(setFuelRecords)
+    }
+  }, [tab])
+
+  // Fire due-service notifications after data loads
+  useEffect(() => {
+    if (!records.length && !Object.keys(intervals).length) return
+    const alertDays = 30
+    checkAndScheduleNotifications(
+      [{ ...vehicle, currentMileage }],
+      { [vehicle.id]: records },
+      { [vehicle.id]: intervals },
+      alertDays
+    )
+  }, [records, intervals])
+
+  const getLastRecord = (itemId) => records.find(r => r.itemId === itemId && r.type !== 'repair')
 
   const getInterval = (item) => intervals[item.id]?.miles ?? item.defaultIntervalMiles
 
@@ -72,10 +107,8 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
   const getOverdueItems = () => {
     const today = new Date()
     return visibleItems.filter(item => {
-      // Mileage overdue
       const next = getNextMileage(item)
       if (next && currentMileage >= next) return true
-      // Time overdue
       const last = getLastRecord(item.id)
       if (item.defaultIntervalMonths && last?.date) {
         const dueDate = new Date(last.date)
@@ -107,6 +140,9 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
 
   const handleLogService = async (record) => {
     await saveMaintenanceRecord(user.uid, vehicle.id, record)
+    if (record.itemId && record.itemId !== 'repair') {
+      clearServiceNotifications(vehicle.id, record.itemId)
+    }
     const fresh = await getMaintenanceRecords(user.uid, vehicle.id)
     setRecords(fresh)
     if (record.mileage > currentMileage) {
@@ -115,6 +151,7 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
     }
     setLogItem(null)
     setResetItem(null)
+    setShowRepairModal(false)
   }
 
   const handleVoiceConfirm = async ({ services, mileage }) => {
@@ -136,11 +173,31 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
     setVoiceActive(false)
   }
 
+  const handleSaveFuel = async (record) => {
+    await saveFuelRecord(user.uid, vehicle.id, record)
+    const fresh = await getFuelRecords(user.uid, vehicle.id)
+    setFuelRecords(fresh)
+    if (record.mileage > currentMileage) {
+      setCurrentMileage(record.mileage)
+      await saveVehicle(user.uid, { ...vehicle, currentMileage: record.mileage })
+    }
+    setShowFuelModal(false)
+  }
+
+  const handleDeleteFuel = async (recordId) => {
+    await deleteFuelRecord(user.uid, vehicle.id, recordId)
+    const fresh = await getFuelRecords(user.uid, vehicle.id)
+    setFuelRecords(fresh)
+  }
+
   const visibleItems = MAINTENANCE_ITEMS.filter(
     item => !(prefs.hiddenServices ?? []).includes(item.id)
   )
 
   const vehicleLabel = vehicle.nickname || `${vehicle.year} ${vehicle.make} ${vehicle.model}`
+  const serviceRecords = records.filter(r => r.type !== 'repair')
+  const repairRecords  = records.filter(r => r.type === 'repair')
+  const allLogbookRecords = records
 
   return (
     <div className="vehicle-dashboard">
@@ -201,12 +258,18 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
         return (
           <div className="overdue-banner">
             <div className="overdue-banner-title">
-              {overdue.length === 1 ? '1 SERVICE DUE' : `${overdue.length} SERVICES DUE`}
+              {overdue.length === 1
+                ? '1 SERVICE OVERDUE — don\'t wait'
+                : `${overdue.length} SERVICES OVERDUE — action needed`}
             </div>
             <div className="overdue-banner-items">
               {overdue.map(item => {
                 const next = getNextMileage(item)
                 const milesOver = next ? currentMileage - next : null
+                const { estimatedDate } = getDueInfo(item)
+                const daysOver = estimatedDate
+                  ? Math.round((new Date() - estimatedDate) / (1000 * 60 * 60 * 24))
+                  : null
                 return (
                   <button
                     key={item.id}
@@ -215,7 +278,12 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
                   >
                     <span>{item.label}</span>
                     <span className="overdue-detail">
-                      {milesOver > 0 ? `${fmtDist(milesOver, prefs.useMetric)} overdue` : 'time limit reached'} · Log now →
+                      {milesOver > 0
+                        ? `${fmtDist(milesOver, prefs.useMetric)} past due`
+                        : daysOver > 0
+                          ? `${daysOver} day${daysOver !== 1 ? 's' : ''} past due`
+                          : 'time limit reached'
+                      } · Log now →
                     </span>
                   </button>
                 )
@@ -230,13 +298,19 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
           className={`dash-tab ${tab === 'schedule' ? 'active' : ''}`}
           onClick={() => setTab('schedule')}
         >
-          Service Schedule
+          Schedule
         </button>
         <button
           className={`dash-tab ${tab === 'logbook' ? 'active' : ''}`}
           onClick={() => setTab('logbook')}
         >
-          Logbook {records.length > 0 && <span className="tab-badge">{records.length}</span>}
+          Logbook {allLogbookRecords.length > 0 && <span className="tab-badge">{allLogbookRecords.length}</span>}
+        </button>
+        <button
+          className={`dash-tab ${tab === 'fuel' ? 'active' : ''}`}
+          onClick={() => setTab('fuel')}
+        >
+          Fuel {fuelRecords.length > 0 && <span className="tab-badge">{fuelRecords.length}</span>}
         </button>
       </div>
 
@@ -247,13 +321,13 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
             onClick={() => setVoiceActive(true)}
             title="Log services by voice"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <rect x="9" y="2" width="6" height="13" rx="3" />
               <path d="M5 10a7 7 0 0 0 14 0" />
               <line x1="12" y1="17" x2="12" y2="21" />
               <line x1="9" y1="21" x2="15" y2="21" />
             </svg>
-            Log by Voice
+            Say it, we log it →
           </button>
           {visibleItems.map(item => (
             <MaintenanceCard
@@ -270,11 +344,31 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
               onReset={item.resetAction ? () => setResetItem(item) : undefined}
             />
           ))}
+          <button
+            className="repair-log-btn"
+            onClick={() => setShowRepairModal(true)}
+          >
+            + Log a Repair or Shop Visit
+          </button>
         </div>
       )}
 
       {tab === 'logbook' && (
-        <LogbookPage vehicle={{ ...vehicle, currentMileage }} records={records} onDeleteRecord={handleDeleteRecord} />
+        <LogbookPage
+          vehicle={{ ...vehicle, currentMileage }}
+          records={allLogbookRecords}
+          onDeleteRecord={handleDeleteRecord}
+          onLogRepair={() => setShowRepairModal(true)}
+        />
+      )}
+
+      {tab === 'fuel' && (
+        <FuelTab
+          records={fuelRecords}
+          useMetric={prefs.useMetric}
+          onAddFuel={() => setShowFuelModal(true)}
+          onDeleteFuel={handleDeleteFuel}
+        />
       )}
 
       {logItem && (
@@ -298,6 +392,24 @@ export default function VehicleDashboard({ vehicle, onBack, onEdit }) {
           onSave={handleLogService}
           onClose={() => setResetItem(null)}
           resetMode={true}
+        />
+      )}
+
+      {showRepairModal && (
+        <RepairLogModal
+          currentMileage={currentMileage}
+          useMetric={prefs.useMetric}
+          onSave={handleLogService}
+          onClose={() => setShowRepairModal(false)}
+        />
+      )}
+
+      {showFuelModal && (
+        <FuelLogModal
+          currentMileage={currentMileage}
+          useMetric={prefs.useMetric}
+          onSave={handleSaveFuel}
+          onClose={() => setShowFuelModal(false)}
         />
       )}
 

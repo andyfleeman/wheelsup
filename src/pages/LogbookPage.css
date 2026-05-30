@@ -37,6 +37,30 @@
   border-radius: 20px;
 }
 
+.logbook-toolbar-right {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.export-csv-btn {
+  padding: 0.5rem 0.85rem;
+  background: rgba(46,125,50,0.1);
+  color: #2e7d32;
+  border: 1px solid rgba(46,125,50,0.2);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+
+.export-csv-btn:hover {
+  background: rgba(46,125,50,0.18);
+}
+
 .print-btn {
   padding: 0.5rem 1rem;
   background: #1c1c1e;
@@ -52,6 +76,26 @@
 }
 
 .print-btn:hover { background: #c62828; }
+
+.logbook-repair-btn {
+  width: 100%;
+  padding: 0.7rem;
+  background: none;
+  border: 1.5px dashed #d0d0d0;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #aaa;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 0.25rem;
+}
+
+.logbook-repair-btn:hover {
+  border-color: #c62828;
+  color: #c62828;
+  background: rgba(198,40,40,0.03);
+}
 
 /* ── Screen: stacked log cards ── */
 .logbook-cards {
@@ -164,9 +208,32 @@
 
 .delete-record-btn:hover { color: #c62828; }
 
+.log-card-repair {
+  border-left: 3px solid #1565c0;
+}
+
+.log-chip-shop {
+  background: rgba(21,101,192,0.08);
+  color: #1565c0;
+  border: 1px solid rgba(21,101,192,0.15);
+}
+
 .reset-badge {
   display: inline-block;
   background: #1c1c1e;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+  letter-spacing: 0.05em;
+}
+
+.repair-badge {
+  display: inline-block;
+  background: #1565c0;
   color: white;
   font-size: 0.6rem;
   font-weight: 800;
@@ -234,14 +301,17 @@
     background: white !important;
   }
 
-  .row-reset td { background: #f8f8f8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .reset-badge { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .row-reset td  { background: #f8f8f8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .row-repair td { background: #f0f4ff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .reset-badge  { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .repair-badge { background: #1565c0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .logbook-table tr { page-break-inside: avoid; }
 
-  .col-date    { white-space: nowrap; color: #888; width: 90pt; font-size: 9pt; }
-  .col-mileage { white-space: nowrap; width: 70pt; font-weight: 600; }
+  .col-date    { white-space: nowrap; color: #888; width: 80pt; font-size: 9pt; }
+  .col-mileage { white-space: nowrap; width: 60pt; font-weight: 600; }
   .col-service { font-weight: 600; }
-  .col-cost    { white-space: nowrap; width: 55pt; font-weight: 600; color: #2e7d32; }
+  .col-shop    { color: #666; font-size: 9pt; width: 70pt; }
+  .col-cost    { white-space: nowrap; width: 50pt; font-weight: 600; color: #2e7d32; }
   .col-notes   { color: #999; font-size: 9pt; }
 
   .logbook-print-footer {

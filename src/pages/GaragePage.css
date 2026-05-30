@@ -62,11 +62,20 @@
 }
 
 .garage-title {
-  margin: 0;
+  margin: 0 0 0.15rem;
   font-size: 1.75rem;
   font-weight: 800;
   color: white;
   letter-spacing: -0.03em;
+}
+
+.garage-tagline {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.35);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .garage-body {
@@ -107,8 +116,26 @@
 
 .empty-state p {
   color: #888;
-  margin: 0;
+  margin: 0 0 1.25rem;
   font-size: 0.9rem;
+}
+
+.empty-feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+.empty-feature {
+  font-size: 0.82rem;
+  color: #777;
+  padding: 0.45rem 0.75rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .vehicle-list {

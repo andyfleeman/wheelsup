@@ -1,0 +1,48 @@
+.fuel-amount-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fuel-amount-wrap input {
+  flex: 1;
+}
+
+.fuel-unit {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #888;
+  white-space: nowrap;
+}
+
+.fuel-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.fuel-checkbox-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #c62828;
+  cursor: pointer;
+}
+
+.fuel-checkbox-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #aaa;
+  margin-left: 0.25rem;
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-top: 0.25rem;
+  display: block;
+}

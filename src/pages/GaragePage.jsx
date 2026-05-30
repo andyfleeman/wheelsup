@@ -80,6 +80,7 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }
           </button>
         </div>
         <h1 className="garage-title">{greeting}</h1>
+        <p className="garage-tagline">Every service. On track.</p>
       </div>
 
       <div className="garage-body">
@@ -89,7 +90,12 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }
           <div className="empty-state">
             <div className="empty-badge">GARAGE EMPTY</div>
             <h3>Add your first vehicle</h3>
-            <p>Tap the button below to start tracking maintenance.</p>
+            <p>Takes 30 seconds. We'll look up the OEM oil spec and have you tracking in no time.</p>
+            <div className="empty-feature-list">
+              <div className="empty-feature">🗣️ Voice logging — say it, we log it</div>
+              <div className="empty-feature">📅 Due dates by mileage & time</div>
+              <div className="empty-feature">📋 Full service history, always at hand</div>
+            </div>
           </div>
         ) : (
           <div className="vehicle-list">
