@@ -63,6 +63,13 @@
   margin-bottom: 1.5rem;
 }
 
+.onboarding-logo-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 9px;
+}
+
 .onboarding-wordmark {
   font-size: 1.5rem;
   font-weight: 900;

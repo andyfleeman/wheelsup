@@ -71,7 +71,7 @@ export default function GaragePage({ onSelectVehicle, onAddVehicle, onSettings }
     <div className="garage-page">
       <div className="garage-header">
         <div className="garage-header-top">
-          <span className="garage-wordmark">Klyp</span>
+          <img src="/wheelsup/icon-192.png" className="garage-logo-img" alt="Klyp" />
           <button className="settings-gear-btn" onClick={onSettings} title="Settings">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3"/>

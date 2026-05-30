@@ -301,6 +301,13 @@
   margin-bottom: 0.25rem;
 }
 
+.settings-about-logo-img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
 .settings-about-name {
   font-size: 1.1rem;
   font-weight: 900;
