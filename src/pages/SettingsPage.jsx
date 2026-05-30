@@ -252,12 +252,7 @@ export default function SettingsPage({ onBack }) {
 
           <div className="settings-about">
             <div className="settings-about-logo">
-              <svg viewBox="0 0 40 40" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
-                <polygon points="20,2 37,11 37,29 20,38 3,29 3,11" fill="#c62828"/>
-                <polygon points="20,9 30,15 30,25 20,31 10,25 10,15" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1"/>
-                <path d="M13 10 L13 30 M13 20 L23 10 M13 20 L25 30"
-                      stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              </svg>
+              <img src="/wheelsup/icon-192.png" className="settings-about-logo-img" alt="Klyp" />
               <span className="settings-about-name">Klyp</span>
             </div>
             <div className="settings-about-tagline">The maintenance log you'll actually keep.</div>

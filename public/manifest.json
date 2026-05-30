@@ -5,7 +5,7 @@
   "start_url": "/wheelsup/",
   "display": "standalone",
   "background_color": "#0f0f0f",
-  "theme_color": "#c62828",
+  "theme_color": "#1565c0",
   "orientation": "portrait",
   "icons": [
     {

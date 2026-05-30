@@ -75,7 +75,7 @@
   transition: background 0.15s;
 }
 
-.print-btn:hover { background: #c62828; }
+.print-btn:hover { background: #1565c0; }
 
 .logbook-repair-btn {
   width: 100%;
@@ -92,9 +92,9 @@
 }
 
 .logbook-repair-btn:hover {
-  border-color: #c62828;
-  color: #c62828;
-  background: rgba(198,40,40,0.03);
+  border-color: #1565c0;
+  color: #1565c0;
+  background: rgba(21,101,192,0.03);
 }
 
 /* ── Screen: stacked log cards ── */
@@ -206,7 +206,7 @@
   transition: color 0.15s;
 }
 
-.delete-record-btn:hover { color: #c62828; }
+.delete-record-btn:hover { color: #1565c0; }
 
 .log-card-repair {
   border-left: 3px solid #1565c0;
