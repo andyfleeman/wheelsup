@@ -48,11 +48,11 @@
 
 .onboarding-dot.active {
   width: 22px;
-  background: #c62828;
+  background: #1565c0;
 }
 
 .onboarding-dot.done {
-  background: #c62828;
+  background: #1565c0;
   opacity: 0.35;
 }
 
@@ -66,7 +66,7 @@
 .onboarding-wordmark {
   font-size: 1.5rem;
   font-weight: 900;
-  color: #c62828;
+  color: #1565c0;
   letter-spacing: -0.04em;
 }
 
@@ -135,7 +135,7 @@
 }
 
 .onboarding-cta {
-  background: #c62828;
+  background: #1565c0;
   color: white;
   border: none;
   border-radius: 14px;
@@ -147,8 +147,8 @@
   letter-spacing: 0.01em;
 }
 
-.onboarding-cta:hover { background: #b71c1c; }
-.onboarding-cta:active { background: #a31515; transform: scale(0.98); }
+.onboarding-cta:hover { background: #1148a0; }
+.onboarding-cta:active { background: #0d3d8a; transform: scale(0.98); }
 
 .onboarding-skip {
   background: none;

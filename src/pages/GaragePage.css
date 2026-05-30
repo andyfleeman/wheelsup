@@ -7,7 +7,7 @@
 .garage-header {
   background: #1c1c1e;
   padding: calc(env(safe-area-inset-top) + 1rem) 1rem 1.5rem;
-  border-bottom: 3px solid #c62828;
+  border-bottom: 3px solid #1565c0;
 }
 
 .garage-header-top {
@@ -20,7 +20,7 @@
 .garage-wordmark {
   font-size: 1rem;
   font-weight: 900;
-  color: #c62828;
+  color: #1565c0;
   letter-spacing: -0.02em;
 }
 
@@ -247,9 +247,9 @@
 .vehicle-mileage-chip {
   display: inline-block;
   padding: 0.15rem 0.55rem;
-  background: rgba(198,40,40,0.08);
-  color: #c62828;
-  border: 1px solid rgba(198,40,40,0.15);
+  background: rgba(21,101,192,0.08);
+  color: #1565c0;
+  border: 1px solid rgba(21,101,192,0.15);
   border-radius: 20px;
   font-size: 0.72rem;
   font-weight: 700;
@@ -287,7 +287,7 @@
   transition: color 0.15s;
 }
 
-.delete-btn:hover { color: #c62828; }
+.delete-btn:hover { color: #1565c0; }
 
 .vehicle-arrow {
   font-size: 1.4rem;
@@ -300,14 +300,14 @@
   bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
   left: 50%;
   transform: translateX(-50%);
-  background: #c62828;
+  background: #1565c0;
   color: white;
   border: none;
   border-radius: 28px;
   padding: 0.95rem 2rem;
   font-size: 1rem;
   font-weight: 700;
-  box-shadow: 0 4px 20px rgba(198,40,40,0.45);
+  box-shadow: 0 4px 20px rgba(21,101,192,0.45);
   cursor: pointer;
   z-index: 50;
   transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
@@ -317,8 +317,8 @@
 }
 
 .fab:hover {
-  background: #b71c1c;
-  box-shadow: 0 6px 24px rgba(198,40,40,0.5);
+  background: #1148a0;
+  box-shadow: 0 6px 24px rgba(21,101,192,0.5);
 }
 
 .fab:active { transform: translateX(-50%) scale(0.98); }

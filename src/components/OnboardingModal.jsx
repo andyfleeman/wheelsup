@@ -59,7 +59,7 @@ export default function OnboardingModal({ onDone }) {
         {current.showLogo && (
           <div className="onboarding-logo-wrap">
             <svg viewBox="0 0 40 40" width="52" height="52" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="20,2 37,11 37,29 20,38 3,29 3,11" fill="#c62828"/>
+              <polygon points="20,2 37,11 37,29 20,38 3,29 3,11" fill="#1565c0"/>
               <polygon points="20,9 30,15 30,25 20,31 10,25 10,15" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1"/>
               <path d="M13 10 L13 30 M13 20 L23 10 M13 20 L25 30" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
             </svg>

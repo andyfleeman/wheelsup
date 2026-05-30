@@ -17,8 +17,8 @@ export default function LoginPage() {
           <svg viewBox="0 0 80 80" width="80" height="80" xmlns="http://www.w3.org/2000/svg" className="login-logo-hex">
             <defs>
               <linearGradient id="hexbg" x1="0" y1="0" x2="0.6" y2="1">
-                <stop offset="0%" stopColor="#e53935"/>
-                <stop offset="100%" stopColor="#b71c1c"/>
+                <stop offset="0%" stopColor="#1e88e5"/>
+                <stop offset="100%" stopColor="#1148a0"/>
               </linearGradient>
             </defs>
             <polygon points="40,3 74,22 74,58 40,77 6,58 6,22" fill="url(#hexbg)"/>
