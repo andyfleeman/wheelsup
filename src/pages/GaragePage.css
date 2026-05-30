@@ -18,10 +18,9 @@
 }
 
 .garage-logo-img {
-  width: 32px;
-  height: 32px;
+  height: 28px;
+  width: auto;
   object-fit: contain;
-  border-radius: 6px;
 }
 
 .logout-btn {
