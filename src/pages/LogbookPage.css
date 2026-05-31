@@ -29,10 +29,10 @@
 
 .logbook-total {
   font-size: 0.82rem;
-  color: #2e7d32;
+  color: #1565c0;
   font-weight: 700;
-  background: rgba(46,125,50,0.08);
-  border: 1px solid rgba(46,125,50,0.15);
+  background: rgba(21,101,192,0.08);
+  border: 1px solid rgba(21,101,192,0.18);
   padding: 0.15rem 0.55rem;
   border-radius: 20px;
 }
@@ -45,9 +45,9 @@
 
 .export-csv-btn {
   padding: 0.5rem 0.85rem;
-  background: rgba(46,125,50,0.1);
-  color: #2e7d32;
-  border: 1px solid rgba(46,125,50,0.2);
+  background: rgba(21,101,192,0.08);
+  color: #1565c0;
+  border: 1px solid rgba(21,101,192,0.2);
   border-radius: 8px;
   font-size: 0.78rem;
   font-weight: 700;
@@ -58,7 +58,7 @@
 }
 
 .export-csv-btn:hover {
-  background: rgba(46,125,50,0.18);
+  background: rgba(21,101,192,0.16);
 }
 
 .print-btn {
@@ -122,7 +122,7 @@
 
 .log-card-reset {
   background: #fafafa;
-  border-left: 3px solid #1c1c1e;
+  border-left: 3px solid rgba(21,101,192,0.35);
 }
 
 .log-card-top {
@@ -171,9 +171,9 @@
 }
 
 .log-chip-cost {
-  background: rgba(46,125,50,0.09);
-  color: #2e7d32;
-  border: 1px solid rgba(46,125,50,0.2);
+  background: rgba(21,101,192,0.08);
+  color: #1565c0;
+  border: 1px solid rgba(21,101,192,0.2);
 }
 
 .log-card-notes {
@@ -311,7 +311,7 @@
   .col-mileage { white-space: nowrap; width: 60pt; font-weight: 600; }
   .col-service { font-weight: 600; }
   .col-shop    { color: #666; font-size: 9pt; width: 70pt; }
-  .col-cost    { white-space: nowrap; width: 50pt; font-weight: 600; color: #2e7d32; }
+  .col-cost    { white-space: nowrap; width: 50pt; font-weight: 600; color: #1565c0; }
   .col-notes   { color: #999; font-size: 9pt; }
 
   .logbook-print-footer {
